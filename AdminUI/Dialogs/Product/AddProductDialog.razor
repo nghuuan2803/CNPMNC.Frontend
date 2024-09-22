@@ -1,0 +1,29 @@
+﻿<MudDialog>
+    <DialogContent>
+        <MudForm Spacing="spacing">
+            <MudTextField T="string" Label="Username" />
+            <MudTextField T="string" Label="Email" />
+            <MudTextField T="string" Label="Password" HelperText="Choose a strong password" InputType="InputType.Password" />
+            <MudTextField T="string" Label="Password" HelperText="Repeat the password" InputType="InputType.Password" />
+            <div class="d-flex">
+                <MudRadioGroup T="string">
+                    <MudRadio Value="@("Personal")">Personal</MudRadio>
+                    <MudRadio Value="@("Professional")">Professional</MudRadio>
+                </MudRadioGroup>
+            </div>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Okayla</MudButton>
+    </DialogActions>
+</MudDialog>
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    private void Submit() => MudDialog.Close(DialogResult.Ok(true));
+
+    private void Cancel() => MudDialog.Cancel();
+    int spacing = 0;
+}

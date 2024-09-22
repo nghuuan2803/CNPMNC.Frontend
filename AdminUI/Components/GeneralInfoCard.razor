@@ -1,0 +1,39 @@
+﻿<style>
+    .general-card {
+        border-radius: 20px;
+        margin-top: 20px;
+        margin-bottom: 6px;
+        padding-top: 20px;
+        padding-left: 20px;
+        padding-right: 20px;
+        padding-bottom: 15px;
+        color: white;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Nunito', sans-serif;
+        font-weight: 700;
+    }
+
+    p, div {
+        font-family: 'Nunito', sans-serif;
+        font-weight: 400;
+    }
+</style>
+<div class="general-card" style="background: @BgColor">
+    <p>@Title</p>
+    <h3>@Count</h3>
+    <div>@Percent%</div>
+</div>
+@code {
+    [Parameter]
+    public string Title { get; set; } = "Tổng hàng hóa";
+    [Parameter]
+    public int Count { get; set; } = 4106;
+    [Parameter]
+    public double Percent { get; set; } = 88.88;
+    [Parameter]
+    public bool Increase { get; set; } = true;
+    [Parameter]
+    public string BgColor { get; set; } = "#F3797E";
+}

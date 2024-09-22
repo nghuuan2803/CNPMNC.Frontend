@@ -1,0 +1,80 @@
+﻿<style>
+    .zone-info {
+        padding-top: 15px;
+        padding-left: 15px;
+        padding-right: 15px;
+        padding-bottom: 5px;
+        margin-top: 20px;
+        border-radius: 20px;
+        background: #FFF;
+    }
+    .zone-line{
+        background-color: #0d6efd;
+        border-radius: 15px;
+        height:15px;
+    }
+    .zone-info h3{
+        font-family: 'Nunito',sans-serif;
+        font-weight: 700;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Nunito', sans-serif;
+        font-weight: 700;
+    }
+
+    p {
+        font-family: 'Nunito', sans-serif;
+        font-weight: 400;
+    }
+</style>
+<div class="zone-info">
+    <h5>Tình trạng kho</h5>
+    @foreach (var zone in Zones)
+    {
+        <div>@zone.Name</div>
+        <div class="row">
+            <div class="col-10">
+                <div class="zone-line" style="width: @zone.Percent%"></div>
+            </div>
+            <div class="col-2" style="text-align:right">
+                @zone.Quantity
+            </div>
+        </div>
+        <br />
+    }
+</div>
+
+@code {
+    public List<ZoneInfo> Zones { get; set; } = new()
+    {
+        new ZoneInfo
+        {
+            Id=1,
+            Name = "Khu A",
+            Quantity = 575,
+            Percent = 80
+        },
+        new ZoneInfo
+        {
+            Id=2,
+            Name = "Khu B",
+            Quantity = 118,
+            Percent = 25
+        },
+        new ZoneInfo
+        {
+            Id=3,
+            Name = "Khu C",
+            Quantity = 417,
+            Percent = 50
+        },
+        new ZoneInfo
+        {
+            Id=4,
+            Name = "Khu D",
+            Quantity = 496,
+            Percent = 65
+        }
+    };
+}

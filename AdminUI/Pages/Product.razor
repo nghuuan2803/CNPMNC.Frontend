@@ -1,0 +1,16 @@
+﻿@page "/product"
+@inject IDialogService DialogService
+<h3 class="productcard">Product</h3>
+
+<MudButton @onclick="OpenDialogAsync" Variant="Variant.Filled" Color="Color.Primary">
+    Open Dialog
+</MudButton>
+
+@code {
+    private Task OpenDialogAsync()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+
+        return DialogService.ShowAsync<AddProductDialog>("Simple Dialog", options);
+    }
+}

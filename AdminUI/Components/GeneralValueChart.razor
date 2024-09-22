@@ -1,0 +1,24 @@
+﻿<style>
+    .value-chart{
+        padding-top: 15px;
+        padding-left: 15px;
+        padding-right: 15px;
+        padding-bottom: 5px;
+        margin-top: 20px;
+        border-radius: 20px;
+        background: #FFF;
+    }
+</style>
+<div class="value-chart">
+    <MudChart ChartType="ChartType.Donut" LegendPosition="Position.Right" Width="250px" Height="250px" InputData="@data" InputLabels="@labels">
+        <CustomGraphics>
+            <text class="donut-inner-text" x="47%" y="35%" dominant-baseline="middle" text-anchor="middle" fill="black" font-family="Helvetica" font-size="4">Total</text>
+            <text class="donut-inner-text" x="47%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="black" font-family="Helvetica" font-size="3">@(string.Format("{0:#,0} đ",data.Sum().ToString()))</text>
+        </CustomGraphics>
+    </MudChart>
+</div>
+
+@code {
+    public double[] data = { 205000000, 210500000, 165500000, 170750000};
+    public string[] labels = { "Ti vi", "Máy giặt", "Máy lọc nước", "Nồi cơm điện" };
+}
