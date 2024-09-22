@@ -1,16 +1,90 @@
 ﻿@page "/product"
 @inject IDialogService DialogService
+@using System.Net.Http.Json
+
 <h3 class="productcard">Product</h3>
 
-<MudButton @onclick="OpenDialogAsync" Variant="Variant.Filled" Color="Color.Primary">
-    Open Dialog
-</MudButton>
+<MudFab Class="mb-1" StartIcon="@Icons.Material.Filled.Add" @onclick="OpenDialogAsync" Color="Color.Primary"/>
+<br />
+<MudDataGrid T="ProductModel" Items="@Data" ReadOnly="false" EditMode="DataGridEditMode.Form"  Bordered="true" Dense="true"
+EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode ="ResizeMode.Column">
+    <Columns>
+        <HierarchyColumn T="ProductModel" ButtonDisabledFunc="@(x => x.Name == "Cấm xem")" InitiallyExpandedFunc="@(x => x.Name == "Mở lúc load")" />
+        <PropertyColumn Property="x => x.Id" Title="Nr" Editable="false" />
+        <PropertyColumn Property="x => x.Name" />
+        <PropertyColumn Property="x => x.Price" />
+        <PropertyColumn Property="x => x.Quantity"/>            
+        <TemplateColumn Hidden="false" StickyRight="true" Raw>
+            <CellTemplate>
+                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync" />
+                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" OnClick="()=> ShowDeleteConfirmation(context.Item)" />
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <ChildRowContent>
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">@context.Item.Name</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudText>This element is number @context.Item.Id</MudText>
+                <MudText>This element has a molar mass of @context.Item.Description</MudText>
+            </MudCardContent>
+        </MudCard>
+    </ChildRowContent>
+    <PagerContent>
+        <MudDataGridPager T="ProductModel" />
+    </PagerContent>
+</MudDataGrid>
+
+
 
 @code {
+    private List<string> _events = new();
+
     private Task OpenDialogAsync()
     {
         var options = new DialogOptions { CloseOnEscapeKey = true };
-
         return DialogService.ShowAsync<AddProductDialog>("Simple Dialog", options);
+    }
+
+    public List<ProductModel> Data { get; set; } = ProductModel.GenData();
+
+    // events
+    void StartedEditingItem(ProductModel item)
+    {
+        _events.Insert(0, $"Event = StartedEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
+
+    }
+
+    void CanceledEditingItem(ProductModel item)
+    {
+        _events.Insert(0, $"Event = CanceledEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
+    }
+
+    void CommittedItemChanges(ProductModel item)
+    {
+        _events.Insert(0, $"Event = CommittedItemChanges, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
+        //Gọi API Update Product
+    }
+    private async Task ShowDeleteConfirmation(ProductModel item)
+    {
+        var parameters = new DialogParameters { ["Message"] = $"Hãy cân nhắc kỹ trước khi xóa {item.Name}" };
+        var options = new DialogOptions { CloseButton = false, CloseOnEscapeKey = true};
+
+        var dialog = DialogService.Show<ConfirmDialog>("Confirm Delete", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            DeleteItem(item);
+        }
+    }
+    private void DeleteItem(ProductModel item)
+    {
+        Data.Remove(item); // Xóa item khỏi danh sách
+        //Gọi API nữa là xong
     }
 }
