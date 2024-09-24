@@ -1,29 +1,53 @@
 ﻿<MudDialog>
     <DialogContent>
-        <MudForm Spacing="spacing">
-            <MudTextField T="string" Label="Username" />
-            <MudTextField T="string" Label="Email" />
-            <MudTextField T="string" Label="Password" HelperText="Choose a strong password" InputType="InputType.Password" />
-            <MudTextField T="string" Label="Password" HelperText="Repeat the password" InputType="InputType.Password" />
-            <div class="d-flex">
-                <MudRadioGroup T="string">
-                    <MudRadio Value="@("Personal")">Personal</MudRadio>
-                    <MudRadio Value="@("Professional")">Professional</MudRadio>
+        <MudForm @ref="form" Spacing="spacing" style="width:400px">
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Name" @bind-Value="name" Required="true" RequiredError="Name is required"  />
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Description" @bind-Value="description" />
+            <MudTextField InputType="InputType.Number" Variant="Variant.Outlined" Margin="Margin.Dense" T="double" Label="Price" @bind-Value="price" HelperText="Enter a valid price" Required="true" RequiredError="Price is required" />
+            <MudTextField InputType="InputType.Number" Variant="Variant.Outlined" Margin="Margin.Dense" T="int" Label="Quantity" @bind-Value="quantity" HelperText="Enter quantity" Required="true" RequiredError="Quantity is required" />
+@*             <div class="d-flex">
+                <MudRadioGroup T="string" @bind-Value="category">
+                    <MudRadio  Value=@("Personal")>Personal</MudRadio>
+                    <MudRadio Value=@("Professional")>Professional</MudRadio>
                 </MudRadioGroup>
-            </div>
+            </div> *@
         </MudForm>
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Primary" OnClick="Submit">Okayla</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Tertiary" OnClick="SubmitForm">Xác nhận</MudButton>
+        <MudButton Variant="Variant.Text" Color="Color.Secondary" OnClick="Cancel">Hủy</MudButton>
     </DialogActions>
 </MudDialog>
+
 @code {
     [CascadingParameter]
     private MudDialogInstance MudDialog { get; set; }
 
-    private void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    private MudForm form;
+
+    private string name;
+    private string description;
+    private double price = 500000;
+    private int quantity=100;
+    //private string category = "Personal"; // Default value
+
+    private async Task SubmitForm()
+    {
+        await form.Validate();
+        if (form.IsValid)
+        {
+            // Form is valid, close the dialog and pass the data
+            var formData = new ProductModel(0, name, quantity, price);
+            MudDialog.Close(DialogResult.Ok(formData));
+        }
+    }
+
+    private void OnInvalidSubmit()
+    {
+        // Handle invalid form submission (e.g., display error messages)
+    }
 
     private void Cancel() => MudDialog.Cancel();
+
     int spacing = 0;
 }

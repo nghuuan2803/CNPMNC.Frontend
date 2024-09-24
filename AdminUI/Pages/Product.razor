@@ -1,58 +1,115 @@
 ﻿@page "/product"
 @inject IDialogService DialogService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
 @using System.Net.Http.Json
 
-<h3 class="productcard">Product</h3>
+<div class="row mb20">
+    <div class="col-12 col-md-6 col-lg-3 my-2">
+        <MudPaper Style="@($"background:{Colors.DeepPurple.Default}; color:{Colors.Shades.White}")" Outlined="true" Height="80px" Class="d-flex align-center justify-center cursor-pointer" @onclick="Category">
+            <MudIcon Icon="@Icons.Material.Filled.Category" Class="mr-1" />
+            <MudText Typo="Typo.h6">Danh mục</MudText>
+        </MudPaper>
+    </div>
+    <div class="col-12 col-md-6 col-lg-3 my-2">
+        <MudPaper Style="@($"background:{Colors.LightBlue.Default}; color:{Colors.Shades.White}")" Outlined="true" Height="80px" Class="d-flex align-center justify-center">
+            Thương hiệu
+        </MudPaper>
+    </div>
+    <div class="col-12 col-md-6 col-lg-3 my-2">
+        <MudPaper Style="@($"background:{Colors.Purple.Default}; color:{Colors.Shades.White}")" Outlined="true" Height="80px" Class="d-flex align-center justify-center">
+            Nhà cung cấp
+        </MudPaper>
+    </div>
+    <div class="col-12 col-md-6 col-lg-3 my-2">
+        <MudPaper Style="@($"background:{Colors.Indigo.Default}; color:{Colors.Shades.White}")" Outlined="true" Height="80px" Class="d-flex align-center justify-center">
+            Xuất xứ
+        </MudPaper>
+    </div>
+</div>
+<style>
+    .mb20 {
+        margin-bottom: 20px;
+    }
+</style>
+<MudDataGrid T="ProductModel" ReadOnly="false" EditMode="DataGridEditMode.Form" QuickFilter="@_quickFilter"
+             Bordered="false" Dense="true" Items="Data" Filterable="false" Hover="true" RowClick="OnRowClick"
+             EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column"
+             Virtualize="true" Loading="loading" Height="400px" FixedHeader="true">
+    <ToolBarContent>
+        <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
+            <MudTooltip Text="Thêm sản phẩm">
+                <MudIconButton Icon="@Icons.Material.Filled.Add" @onclick="OpenDialogAsync"></MudIconButton>
+            </MudTooltip>
+            <MudTooltip Text="Nhập từ file excel">
+                <MudIconButton Icon="@Icons.Material.Filled.FilePresent" @onclick="@(()=>ShowMessage($"Tính năng chưa mở","addmulti"))"></MudIconButton>
+            </MudTooltip>
+            <MudTooltip Text="Download excel">
+                <MudIconButton Icon="@Icons.Material.Filled.Download" @onclick="@(()=>ShowMessage($"Tính năng chưa mở","download"))"></MudIconButton>
+            </MudTooltip>
+        </MudButtonGroup>
+        <MudSpacer />
+        <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.End" Immediate="true"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
 
-<MudFab Class="mb-1" StartIcon="@Icons.Material.Filled.Add" @onclick="OpenDialogAsync" Color="Color.Primary"/>
-<br />
-<MudDataGrid T="ProductModel" Items="@Data" ReadOnly="false" EditMode="DataGridEditMode.Form"  Bordered="true" Dense="true"
-EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode ="ResizeMode.Column">
+    </ToolBarContent>
     <Columns>
-        <HierarchyColumn T="ProductModel" ButtonDisabledFunc="@(x => x.Name == "Cấm xem")" InitiallyExpandedFunc="@(x => x.Name == "Mở lúc load")" />
-        <PropertyColumn Property="x => x.Id" Title="Nr" Editable="false" />
+        <PropertyColumn Property="x => x.Id" Title="ID" Editable="false" />
         <PropertyColumn Property="x => x.Name" />
         <PropertyColumn Property="x => x.Price" />
-        <PropertyColumn Property="x => x.Quantity"/>            
-        <TemplateColumn Hidden="false" StickyRight="true" Raw>
+        <PropertyColumn Property="x => x.Quantity" />
+        <TemplateColumn Hidden="false" StickyRight="false" CellClass="d-flex justify-center">
             <CellTemplate>
-                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync" />
-                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" OnClick="()=> ShowDeleteConfirmation(context.Item)" />
+                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Color="Color.Warning" OnClick="@context.Actions.StartEditingItemAsync" />
+                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="()=> ShowDeleteConfirmation(context.Item)" />
+                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.MoreVert" Color="Color.Dark" OnClick="()=> ShowDeleteConfirmation(context.Item)" />
             </CellTemplate>
         </TemplateColumn>
     </Columns>
-    <ChildRowContent>
-        <MudCard>
-            <MudCardHeader>
-                <CardHeaderContent>
-                    <MudText Typo="Typo.h6">@context.Item.Name</MudText>
-                </CardHeaderContent>
-            </MudCardHeader>
-            <MudCardContent>
-                <MudText>This element is number @context.Item.Id</MudText>
-                <MudText>This element has a molar mass of @context.Item.Description</MudText>
-            </MudCardContent>
-        </MudCard>
-    </ChildRowContent>
     <PagerContent>
         <MudDataGridPager T="ProductModel" />
     </PagerContent>
 </MudDataGrid>
-
-
-
 @code {
+    #region fields - Properties
+    private bool loading = true;
     private List<string> _events = new();
+    public List<ProductModel> Data { get; set; } = new List<ProductModel>();
+    string _searchString = null;
+    #endregion
 
-    private Task OpenDialogAsync()
+    #region Life cycle
+    protected async override Task OnInitializedAsync()
     {
-        var options = new DialogOptions { CloseOnEscapeKey = true };
-        return DialogService.ShowAsync<AddProductDialog>("Simple Dialog", options);
+        loading = true;
+        await Task.Delay(1000);
+        Data = await ProductService.GetFakeData();
+        loading = false;
     }
+    #endregion
 
-    public List<ProductModel> Data { get; set; } = ProductModel.GenData();
 
-    // events
+
+    #region Sự kiện
+    //Tìm kiếm
+    private Func<ProductModel, bool> _quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+
+        if (x.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if ($"{x.Id} {x.Quantity} {x.Price}".Contains(_searchString))
+            return true;
+
+        return false;
+    };
+    private async void OnRowClick(DataGridRowClickEventArgs<ProductModel> args)
+    {
+        await ShowDeleteConfirmation(args.Item);
+        StateHasChanged();
+    }
     void StartedEditingItem(ProductModel item)
     {
         _events.Insert(0, $"Event = StartedEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
@@ -69,22 +126,77 @@ EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode ="ResizeMode.Column">
         _events.Insert(0, $"Event = CommittedItemChanges, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
         //Gọi API Update Product
     }
+    private void Recover(ProductModel item)
+    {
+        Data.Insert(0, item);
+        StateHasChanged();
+    }
+    void ShowMessage(string msg, string key = null!)
+    {
+        var config = (SnackbarOptions options) =>
+        {
+            options.DuplicatesBehavior = SnackbarDuplicatesBehavior.Prevent;
+        };
+        Snackbar.Add(msg, Severity.Info, configure: config, key: key);
+    }
+    #endregion
+
+    #region Xóa
     private async Task ShowDeleteConfirmation(ProductModel item)
     {
         var parameters = new DialogParameters { ["Message"] = $"Hãy cân nhắc kỹ trước khi xóa {item.Name}" };
-        var options = new DialogOptions { CloseButton = false, CloseOnEscapeKey = true};
+        var options = new DialogOptions { CloseButton = false, CloseOnEscapeKey = true };
 
         var dialog = DialogService.Show<ConfirmDialog>("Confirm Delete", parameters, options);
         var result = await dialog.Result;
 
-        if (!result.Canceled)
+        if (!result!.Canceled)
         {
             DeleteItem(item);
+        }
+    }
+    private async Task OpenDialogAsync()
+    {
+        loading = true;
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var dialog = await DialogService.ShowAsync<AddProductDialog>("Simple Dialog", options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is ProductModel newProduct)
+        {
+            // Thêm sản phẩm mới vào danh sách
+            await Task.Delay(500);
+            newProduct.Id = Data.Max(p => p.Id) + 1; // Giả sử tự động tăng ID
+            Data.Insert(0, newProduct);
+            loading = false;
+            // Làm mới lưới dữ liệu
+            StateHasChanged();
+
+            // Hiển thị thông báo thành công
+            Snackbar.Add("Đã thêm sản phẩm thành công!", Severity.Success);
         }
     }
     private void DeleteItem(ProductModel item)
     {
         Data.Remove(item); // Xóa item khỏi danh sách
-        //Gọi API nữa là xong
+                           //gọi API Delete product
+                           //xóa item khỏi datagrid
+        Snackbar.Add($"Xóa thành công", Severity.Warning, c =>
+        {
+            c.SnackbarVariant = Variant.Filled;
+            c.Action = "Khôi phục";
+            c.ActionColor = Color.Info;
+            c.Onclick = snakbar =>
+                {
+                    Recover(item);
+                    return Task.CompletedTask;
+                };
+        });
+    }
+
+    #endregion
+    private void Category(MouseEventArgs e)
+    {
+        Navigation.NavigateTo("weather");
     }
 }
