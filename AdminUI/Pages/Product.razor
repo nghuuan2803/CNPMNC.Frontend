@@ -33,7 +33,7 @@
     }
 </style>
 <MudDataGrid T="ProductModel" ReadOnly="false" EditMode="DataGridEditMode.Form" QuickFilter="@_quickFilter"
-             Bordered="false" Dense="true" Items="Data" Filterable="false" Hover="true" RowClick="OnRowClick"
+             Bordered="true" Dense="true" Items="Data" Filterable="false" Hover="true" RowClick="OnRowClick"
              EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column"
              Virtualize="true" Loading="loading" Height="400px" FixedHeader="true">
     <ToolBarContent>
@@ -107,7 +107,7 @@
     };
     private async void OnRowClick(DataGridRowClickEventArgs<ProductModel> args)
     {
-        await ShowDeleteConfirmation(args.Item);
+        OpenDialogAsync();
         StateHasChanged();
     }
     void StartedEditingItem(ProductModel item)
@@ -175,7 +175,15 @@
             // Hiển thị thông báo thành công
             Snackbar.Add("Đã thêm sản phẩm thành công!", Severity.Success);
         }
+        else
+            loading = false;
     }
+
+    void ShowDetailProduct(ProductModel item)
+    {
+        OpenDialogAsync();
+    }
+
     private void DeleteItem(ProductModel item)
     {
         Data.Remove(item); // Xóa item khỏi danh sách
