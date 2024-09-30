@@ -54,10 +54,10 @@
 
     </ToolBarContent>
     <Columns>
-        <PropertyColumn Property="x => x.Id" Title="ID" Editable="false" />
-        <PropertyColumn Property="x => x.Name" />
-        <PropertyColumn Property="x => x.Price" />
-        <PropertyColumn Property="x => x.Quantity" />
+        <PropertyColumn Property="x => x.Id" Title="Mã sản phẩm" Editable="false" />
+        <PropertyColumn Property="x => x.Name" Title="Tên" />
+        <PropertyColumn Property="x => x.Price" Title="Giá" />
+        <PropertyColumn Property="x => x.Quantity" Title="Số lượng" />
         <TemplateColumn Hidden="false" StickyRight="false" CellClass="d-flex justify-center">
             <CellTemplate>
                 <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Color="Color.Warning" OnClick="@context.Actions.StartEditingItemAsync" />
@@ -107,7 +107,7 @@
     };
     private async void OnRowClick(DataGridRowClickEventArgs<ProductModel> args)
     {
-        OpenDialogAsync();
+        OpenViewDialog(args.Item);
         StateHasChanged();
     }
     void StartedEditingItem(ProductModel item)
@@ -159,7 +159,7 @@
     {
         loading = true;
         var options = new DialogOptions { CloseOnEscapeKey = true };
-        var dialog = await DialogService.ShowAsync<AddProductDialog>("Simple Dialog", options);
+        var dialog = await DialogService.ShowAsync<AddProductDialog>("Thêm sản phẩm", options);
         var result = await dialog.Result;
 
         if (!result.Canceled && result.Data is ProductModel newProduct)
@@ -178,7 +178,10 @@
         else
             loading = false;
     }
-
+    void AddFakeData()
+    {
+        
+    }
     void ShowDetailProduct(ProductModel item)
     {
         OpenDialogAsync();
@@ -189,11 +192,11 @@
         Data.Remove(item); // Xóa item khỏi danh sách
                            //gọi API Delete product
                            //xóa item khỏi datagrid
-        Snackbar.Add($"Xóa thành công", Severity.Warning, c =>
+        Snackbar.Add($"Xóa thành công", Severity.Info, c =>
         {
             c.SnackbarVariant = Variant.Filled;
             c.Action = "Khôi phục";
-            c.ActionColor = Color.Info;
+            c.ActionColor = Color.Tertiary;
             c.Onclick = snakbar =>
                 {
                     Recover(item);
@@ -206,5 +209,13 @@
     private void Category(MouseEventArgs e)
     {
         Navigation.NavigateTo("weather");
+    }
+
+    private async Task OpenViewDialog(ProductModel product)
+    {
+        var parameters = new DialogParameters { ["product"] = product };
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+
+        DialogService.Show<ViewProductDialog>("Chi tiết sản phẩm", parameters, options);
     }
 }
