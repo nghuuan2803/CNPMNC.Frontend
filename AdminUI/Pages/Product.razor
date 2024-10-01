@@ -2,7 +2,11 @@
 @inject IDialogService DialogService
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
+@inject ProductService Service
+@inject IJSRuntime JS
+@inject HttpClient Http
 @using System.Net.Http.Json
+@using ClosedXML.Excel;
 
 <div class="row mb20">
     <div class="col-12 col-md-6 col-lg-3 my-2">
@@ -32,20 +36,40 @@
         margin-bottom: 20px;
     }
 </style>
+@if (_files != null)
+{
+    <MudText Typo="@Typo.h6">@_files.Count() File@(_files.Count() == 1 ? "" : "s"):</MudText>
+    <MudList T="string">
+        @foreach (var file in _files)
+        {
+            <MudListItem Icon="@Icons.Material.Filled.AttachFile" @key="@file">
+                @file.Name <code>@file.Size bytes</code>
+            </MudListItem>
+        }
+    </MudList>
+}
+
 <MudDataGrid T="ProductModel" ReadOnly="false" EditMode="DataGridEditMode.Form" QuickFilter="@_quickFilter"
              Bordered="true" Dense="true" Items="Data" Filterable="false" Hover="true" RowClick="OnRowClick"
-             EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column"
+             EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column" SelectedItem="tempItem" CommittedItemChanges="CommittedItemChanges"
              Virtualize="true" Loading="loading" Height="400px" FixedHeader="true">
     <ToolBarContent>
         <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
             <MudTooltip Text="Thêm sản phẩm">
                 <MudIconButton Icon="@Icons.Material.Filled.Add" @onclick="OpenDialogAsync"></MudIconButton>
             </MudTooltip>
+            @*             <MudTooltip Text="Nhập từ file excel">
+            <MudIconButton Icon="@Icons.Material.Filled.FilePresent" @onclick="@(()=>ShowMessage($"Tính năng chưa mở","addmulti"))"></MudIconButton>
+            </MudTooltip> *@
             <MudTooltip Text="Nhập từ file excel">
-                <MudIconButton Icon="@Icons.Material.Filled.FilePresent" @onclick="@(()=>ShowMessage($"Tính năng chưa mở","addmulti"))"></MudIconButton>
+                <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles">
+                    <ActivatorContent>
+                        <MudIconButton Icon="@Icons.Material.Filled.FilePresent"></MudIconButton>
+                    </ActivatorContent>
+                </MudFileUpload>
             </MudTooltip>
             <MudTooltip Text="Download excel">
-                <MudIconButton Icon="@Icons.Material.Filled.Download" @onclick="@(()=>ShowMessage($"Tính năng chưa mở","download"))"></MudIconButton>
+                <MudIconButton Icon="@Icons.Material.Filled.Download" OnClick="ExportToExcel"></MudIconButton>
             </MudTooltip>
         </MudButtonGroup>
         <MudSpacer />
@@ -56,7 +80,7 @@
     <Columns>
         <PropertyColumn Property="x => x.Id" Title="Mã sản phẩm" Editable="false" />
         <PropertyColumn Property="x => x.Name" Title="Tên" />
-        <PropertyColumn Property="x => x.Price" Title="Giá" />
+        <PropertyColumn Format="#,0 đ" Property="@(x => x.Price)" Title="Giá" />
         <PropertyColumn Property="x => x.Quantity" Title="Số lượng" />
         <TemplateColumn Hidden="false" StickyRight="false" CellClass="d-flex justify-center">
             <CellTemplate>
@@ -70,20 +94,44 @@
         <MudDataGridPager T="ProductModel" />
     </PagerContent>
 </MudDataGrid>
+<script>
+    window.downloadFileFromByteArray = (fileName, byteArray) => {
+        // Tạo Blob từ byte array
+        var blob = new Blob([byteArray], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        var url = URL.createObjectURL(blob);
+
+        // Tạo thẻ <a> để tải file xuống
+        var anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = fileName;
+
+        // Thêm thẻ <a> vào DOM và click để tải file
+        document.body.appendChild(anchor);
+        anchor.click();
+
+        // Sau đó xóa thẻ <a> đi để dọn dẹp
+        document.body.removeChild(anchor);
+        URL.revokeObjectURL(url);
+    };
+</script>
 @code {
     #region fields - Properties
     private bool loading = true;
     private List<string> _events = new();
     public List<ProductModel> Data { get; set; } = new List<ProductModel>();
-    string _searchString = null;
+    public List<ProductModel> ExcelData { get; set; }
+    string _searchString = null!;
+    ProductModel tempItem = null!;
+    IList<IBrowserFile> _files = new List<IBrowserFile>();
     #endregion
 
     #region Life cycle
     protected async override Task OnInitializedAsync()
     {
+        await Task.Delay(100);
         loading = true;
-        await Task.Delay(1000);
-        Data = await ProductService.GetFakeData();
+        //Data = await ProductService.GetFakeData();
+        Data = await Service.GetAllAsync();
         loading = false;
     }
     #endregion
@@ -91,6 +139,98 @@
 
 
     #region Sự kiện
+    private async void UploadFiles(IBrowserFile file)
+    {
+        if (file.ContentType == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || file.ContentType == "application/vnd.ms-excel")
+        {
+            _files.Add(file);
+            loading = true;
+            StateHasChanged();
+            var data = await ReadExcelFile(file);
+            if (!data)
+            {
+                Snackbar.Add("Thông tin file không hợp lệ!", Severity.Error);
+                loading = false;
+                StateHasChanged();
+                return;
+            }
+            var result = await Service.CreateMultipleAsync(ExcelData);
+            if (result != null)
+            {
+                Data.InsertRange(0, result);
+                Snackbar.Add("Nhập danh sách sản phẩm thành công!",Severity.Success);
+                loading = false;
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add("Thông tin file không hợp lệ!", Severity.Error);
+            }
+        }
+        else
+            Snackbar.Add("File không hợp lệ!", Severity.Error);
+    }
+    private async Task<bool> ReadExcelFile(IBrowserFile file)
+    {
+        try
+        {
+            using var stream = file.OpenReadStream();
+            using var memoryStream = new MemoryStream();
+
+            // Đọc file từ stream không đồng bộ
+            await stream.CopyToAsync(memoryStream);
+            memoryStream.Position = 0; // Đặt lại vị trí của stream về đầu
+
+            using var workbook = new XLWorkbook(memoryStream); // Sử dụng ClosedXML để mở file Excel
+
+            var worksheet = workbook.Worksheet(1); // Giả sử dữ liệu nằm ở sheet đầu tiên
+            int rowCount = worksheet.LastRowUsed().RowNumber(); // Lấy số hàng cuối cùng có dữ liệu
+
+            // Xóa danh sách sản phẩm cũ trước khi thêm mới
+            ExcelData = new List<ProductModel>();
+
+            // Đọc từng hàng dữ liệu trong file Excel
+            for (int row = 2; row <= rowCount; row++) // Giả sử hàng đầu tiên là tiêu đề
+            {
+                string name = worksheet.Cell(row, 1).GetString();
+                double price = worksheet.Cell(row, 2).GetDouble();
+                var item = new ProductModel
+                    {
+                        Name = worksheet.Cell(row, 1).GetString(),
+                        Price = worksheet.Cell(row, 2).GetDouble(),
+                        Quantity = (int)worksheet.Cell(row, 3).GetDouble(),
+                        Description = worksheet.Cell(row, 4).GetString(),
+                        CategoryId = (int)worksheet.Cell(row, 5).GetDouble(),
+                        BrandId = (int)worksheet.Cell(row, 6).GetDouble(),
+                    };
+                ExcelData.Add(item);
+            }
+            return true;
+        }
+        catch (Exception ex)
+        {
+            ExcelData = null!;
+            return false;
+        }
+    }
+
+    private async void ExportToExcel()
+    {
+        var response = await Http.GetAsync("api/product/export-excel");
+
+        if (response.IsSuccessStatusCode)
+        {
+            var content = await response.Content.ReadAsByteArrayAsync();
+            var fileName = "products.xlsx";
+
+            // Gọi JavaScript để tạo file và tải xuống
+            await JS.InvokeVoidAsync("downloadFileFromByteArray", fileName, content);
+        }
+        else
+        {
+            Console.WriteLine("Không thể tải file Excel.");
+        }
+    }
     //Tìm kiếm
     private Func<ProductModel, bool> _quickFilter => x =>
     {
@@ -105,7 +245,7 @@
 
         return false;
     };
-    private async void OnRowClick(DataGridRowClickEventArgs<ProductModel> args)
+    private void OnRowClick(DataGridRowClickEventArgs<ProductModel> args)
     {
         OpenViewDialog(args.Item);
         StateHasChanged();
@@ -113,7 +253,7 @@
     void StartedEditingItem(ProductModel item)
     {
         _events.Insert(0, $"Event = StartedEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
-
+        tempItem = item;
     }
 
     void CanceledEditingItem(ProductModel item)
@@ -121,13 +261,25 @@
         _events.Insert(0, $"Event = CanceledEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
     }
 
-    void CommittedItemChanges(ProductModel item)
+    async void CommittedItemChanges(ProductModel item)
     {
         _events.Insert(0, $"Event = CommittedItemChanges, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
-        //Gọi API Update Product
+        var result = await Service.Update(item);
+        if (!result)
+        {
+            Snackbar.Add("Không thể cập nhật!", Severity.Error);
+            Data.Remove(item);
+            Data.Insert(0, tempItem);
+            StateHasChanged();
+        }
+        else
+        {
+            Snackbar.Add("Đã cập nhật sản phẩm thành công!", Severity.Success);
+        }
     }
-    private void Recover(ProductModel item)
+    private async void Recover(ProductModel item)
     {
+        await Service.Recover(item);
         Data.Insert(0, item);
         StateHasChanged();
     }
@@ -166,43 +318,52 @@
         {
             // Thêm sản phẩm mới vào danh sách
             await Task.Delay(500);
-            newProduct.Id = Data.Max(p => p.Id) + 1; // Giả sử tự động tăng ID
-            Data.Insert(0, newProduct);
-            loading = false;
-            // Làm mới lưới dữ liệu
-            StateHasChanged();
-
-            // Hiển thị thông báo thành công
-            Snackbar.Add("Đã thêm sản phẩm thành công!", Severity.Success);
+            newProduct.Id = await Service.CreateAsync(newProduct);
+            if (newProduct.Id != -1)
+            {
+                Data.Insert(0, newProduct);
+                Snackbar.Add("Đã thêm sản phẩm thành công!", Severity.Success);
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add("Đã xảy ra lỗi :(", Severity.Error);
+            }
         }
-        else
-            loading = false;
+        loading = false;
     }
-    void AddFakeData()
-    {
-        
-    }
+
     void ShowDetailProduct(ProductModel item)
     {
         OpenDialogAsync();
     }
 
-    private void DeleteItem(ProductModel item)
+    private async void DeleteItem(ProductModel item)
     {
-        Data.Remove(item); // Xóa item khỏi danh sách
-                           //gọi API Delete product
-                           //xóa item khỏi datagrid
-        Snackbar.Add($"Xóa thành công", Severity.Info, c =>
+
+        var result = await Service.Delete(item.Id); //gọi api xóa trên server
+        if (result == true) //kiểm tra kết quả
         {
-            c.SnackbarVariant = Variant.Filled;
-            c.Action = "Khôi phục";
-            c.ActionColor = Color.Tertiary;
-            c.Onclick = snakbar =>
-                {
-                    Recover(item);
-                    return Task.CompletedTask;
-                };
-        });
+            Data.Remove(item); //Xóa tại frontend
+            StateHasChanged();
+            //Snackbar.Add($"Xóa thành công", Severity.Info);
+            //tạo toast thông báo
+            Snackbar.Add($"Xóa thành công", Severity.Info, c =>
+            {
+                c.SnackbarVariant = Variant.Filled;
+                c.Action = "Hoàn tác"; //tạm tắt tính năng này
+                c.ActionColor = Color.Tertiary;
+                c.Onclick = snakbar =>
+                    {
+                        Recover(item);
+                        return Task.CompletedTask;
+                    };
+            });
+        }
+        else
+        {
+            Snackbar.Add($"Không thể xóa", Severity.Error);
+        }
     }
 
     #endregion
@@ -211,11 +372,11 @@
         Navigation.NavigateTo("weather");
     }
 
-    private async Task OpenViewDialog(ProductModel product)
+    private void OpenViewDialog(ProductModel product)
     {
-        var parameters = new DialogParameters { ["product"] = product };
-        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var parameters = new DialogParameters { ["product"] = product }; //gửi tham chiếu tới dialog
+        var options = new DialogOptions { CloseOnEscapeKey = true }; //cho phép tắt dialog khi bấm nút Esc
 
-        DialogService.Show<ViewProductDialog>("Chi tiết sản phẩm", parameters, options);
+        DialogService.Show<ViewProductDialog>("Chi tiết sản phẩm", parameters, options); //Bật dialog
     }
 }
