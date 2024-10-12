@@ -1,0 +1,25 @@
+﻿<MudDialog>
+    <DialogContent>
+        <MudForm Spacing="spacing" style="width:400px">
+            <MudTextField ReadOnly Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Mã Kho" @bind-Value="Data.Id" />
+            <MudTextField ReadOnly Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Tên Kho" @bind-Value="Data.Name" />
+            <MudTextField ReadOnly Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Số điện thoại" @bind-Value="Data.PhoneNumber" />
+            <MudTextField ReadOnly Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Email" @bind-Value="Data.Email"/>
+            <MudTextField ReadOnly Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Địa chỉ" @bind-Value="Data.Address"/>
+            <MudTextField ReadOnly Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Quản Kho" @bind-Value="Data.ManagerId"/>
+            <hr />
+            <div style="margin-bottom:16px" @onclick=Close class="btn btn-danger">Close</div>
+        </MudForm>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public WarehouseModel Data { get; set; }
+
+    private void Close() => MudDialog.Close(DialogResult.Ok(true));
+    int spacing = 0;
+}

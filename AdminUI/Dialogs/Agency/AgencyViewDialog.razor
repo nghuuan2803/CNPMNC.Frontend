@@ -1,0 +1,37 @@
+﻿<MudDialog>
+    <DialogContent>
+        <MudForm Spacing="spacing" style="width:400px">
+            <MudTextField ReadOnly Variant="Variant.Outlined" Margin="Margin.Dense" T="int" Label="Mã ĐL" @bind-Value="Data.Id" />
+            <MudTextField ReadOnly Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Tên" @bind-Value="Data.Name" />
+            <MudTextField ReadOnly Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Địa chỉ" @bind-Value="Data.Address" />
+            <MudTextField ReadOnly Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="EMail" @bind-Value="Data.Email" />
+            <MudTextField ReadOnly Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="SĐT" @bind-Value="Data.PhoneNumber" />
+            <MudTextField ReadOnly Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Người liên hệ" @bind-Value="Data.ContactPerson" />
+            <MudTextField ReadOnly Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Loại đại lý" @bind-Value="Type" />
+
+            <hr />
+            <div style="margin-bottom:16px" @onclick=Close class="btn btn-danger">Close</div>
+        </MudForm>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public AgencyModel Data { get; set; }
+    public string Type
+    {
+        get => Data.Type == 0 ? "Nội" : "Ủy quyền";
+        set
+        {
+            if (value == "Nội")
+                Data.Type = 0;
+            else
+                Data.Type = 1;
+        }
+    }
+    private void Close() => MudDialog.Close(DialogResult.Ok(true));
+    int spacing = 0;
+}

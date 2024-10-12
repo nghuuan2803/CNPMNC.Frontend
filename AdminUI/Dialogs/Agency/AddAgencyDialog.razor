@@ -1,0 +1,54 @@
+﻿@using AutoMapper
+@inject IMapper Mapper
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="form" Spacing="spacing" style="width:400px">
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="int" Label="Mã đại lý" @bind-Value="Data.Id" Required="true" RequiredError="Name is required" />
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Tên đại lý" @bind-Value="Data.Name" Required="true" RequiredError="Name is required" />
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Địa chỉ" @bind-Value="Data.Address" Required="true" RequiredError="Name is required" />
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Email" @bind-Value="Data.Email" Required="true" RequiredError="Name is required" />
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="SĐT" @bind-Value="Data.PhoneNumber" Required="true" RequiredError="Name is required" />
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Người liên hệ" @bind-Value="Data.ContactPerson" Required="true" RequiredError="Name is required" />
+
+            <div class="d-flex">
+                <MudRadioGroup T="int" @bind-Value="Data.Type">
+                    <MudRadio Value=@(0)>Nội</MudRadio>
+                    <MudRadio Value=1>Ủy quyền</MudRadio>
+                </MudRadioGroup>
+            </div>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Tertiary" OnClick="SubmitForm">Xác nhận</MudButton>
+        <MudButton Variant="Variant.Text" Color="Color.Secondary" OnClick="Cancel">Hủy</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    private MudForm form;
+    public AgencyModel Data { get; set; } = new();
+
+    private async Task SubmitForm()
+    {
+        await form.Validate();
+        if (form.IsValid)
+        {
+            //var result = Mapper.Map<AgencyModel>(Data);
+            // Form is valid, close the dialog and pass the data
+            MudDialog.Close(DialogResult.Ok(Data));
+        }
+    }
+
+
+    private void OnInvalidSubmit()
+    {
+        // Handle invalid form submission (e.g., display error messages)
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    int spacing = 0;
+}

@@ -1,0 +1,63 @@
+﻿@using AutoMapper
+@inject IMapper Mapper
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="form" Spacing="spacing" style="width:400px">
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Mã NV" @bind-Value="Data.Id" Required="true" RequiredError="Name is required" />
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Họ" @bind-Value="Data.FirstName" Required="true" RequiredError="Name is required" />
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Tên" @bind-Value="Data.LastName" Required="true" RequiredError="Name is required" />
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Chức vụ" @bind-Value="Data.Position" Required="true" RequiredError="Name is required" />
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="CCCD" @bind-Value="Data.IdentityNumber" Required="true" RequiredError="Name is required" />
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="SĐT" @bind-Value="Data.PhoneNumber" Required="true" RequiredError="Name is required" />
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Email" @bind-Value="Data.Email" Required="true" RequiredError="Name is required" />
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Địa chỉ" @bind-Value="Data.Address" Required="true" RequiredError="Name is required" />
+            <MudDatePicker PickerVariant="PickerVariant.Dialog" Label="Ngày Sinh" @bind-Date="@(Data.BirthDate)" DateFormat="dd.MM.yyyy" Required />
+            <MudDatePicker PickerVariant="PickerVariant.Dialog" Label="Ngày vào làm" @bind-Date="Data.StartDate" DateFormat="dd.MM.yyyy" />
+            <div class="d-flex">
+                <MudRadioGroup T="int" @bind-Value="Data.Gender">
+                    <MudRadio Value=@(1)>Nam</MudRadio>
+                    <MudRadio Value=2>Nữ</MudRadio>
+                </MudRadioGroup>
+            </div>
+            <div class="d-flex">
+                <MudRadioGroup T="int" @bind-Value="Data.Status">
+                    <MudRadio Value=@(0)>Hoạt động</MudRadio>
+                    <MudRadio Value=1>Khóa</MudRadio>
+                </MudRadioGroup>
+            </div>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Tertiary" OnClick="SubmitForm">Xác nhận</MudButton>
+        <MudButton Variant="Variant.Text" Color="Color.Secondary" OnClick="Cancel">Hủy</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    private MudForm form;
+    public EmployeeForm Data { get; set; } = new();
+
+    private async Task SubmitForm()
+    {
+        await form.Validate();
+        if (form.IsValid)
+        {
+            var result = Mapper.Map<EmployeeModel>(Data);
+            // Form is valid, close the dialog and pass the data
+            MudDialog.Close(DialogResult.Ok(result));
+        }
+    }
+
+
+    private void OnInvalidSubmit()
+    {
+        // Handle invalid form submission (e.g., display error messages)
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    int spacing = 0;
+}

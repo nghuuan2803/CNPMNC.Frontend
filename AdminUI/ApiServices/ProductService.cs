@@ -1,18 +1,19 @@
 ﻿using AdminUI.Objects;
 using AdminUI.Objects.Response;
-using Microsoft.AspNetCore.Components;
 using System.Net.Http.Json;
-using static System.Net.WebRequestMethods;
-using System.Reflection.Metadata;
+using Blazored.LocalStorage;
+using System.Net.Http.Headers;
 namespace AdminUI.Services
 {
     public class ProductService
     {
         private readonly HttpClient _http;
+        private readonly ILocalStorageService _localStorage;
 
-        public ProductService(HttpClient httpClient)
+        public ProductService(HttpClient httpClient, ILocalStorageService localStorage)
         {
             _http = httpClient;
+            _localStorage = localStorage;
         }
         public ProductService() { }
 
@@ -24,23 +25,49 @@ namespace AdminUI.Services
                 FakeData = await ProductModel.GenData();
             return FakeData;
         }
+
+        #region TokenHandler
+        private async Task<string> GetAccessTokenAsync()
+        {
+            var result = await _localStorage.GetItemAsync<string>("jwt_token");
+
+            // Loại bỏ dấu ngoặc kép nếu cần
+            var token = result?.Replace("\"", "");
+
+            return token; // Trả về token đã được loại bỏ dấu ngoặc kép
+        }
+        private async Task AddJwtHeader()
+        {
+            var jwtToken = await GetAccessTokenAsync();
+            if (!string.IsNullOrEmpty(jwtToken))
+            {
+                _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
+            }
+            else
+            {
+                throw new Exception("không có Jwt token");
+            }
+        }
+        #endregion
+        #region CRUD
         public async Task<List<ProductModel>> GetAllAsync()
         {
             try
             {
+                //await AddJwtHeader();
                 var result = await _http.GetFromJsonAsync<ListProductResponse>("api/Product/get-all");
                 return result.Data;
             }
             catch (Exception ex)
             {
-                var msg = ex.Message;
-                throw new Exception(message: "Goi API that bai");
+                throw;
             }
         }
         public async Task<int> CreateAsync(ProductModel model)
         {
             try
             {
+                await AddJwtHeader();
                 // Gửi POST request tới API
                 var response = await _http.PostAsJsonAsync("api/Product/create", model);
 
@@ -68,6 +95,7 @@ namespace AdminUI.Services
         {
             try
             {
+                await AddJwtHeader();
                 // Gửi POST request tới API
                 var response = await _http.PostAsJsonAsync("api/Product/create-multiple", model);
 
@@ -93,6 +121,7 @@ namespace AdminUI.Services
         }
         public async Task<bool> Update(ProductModel model)
         {
+            await AddJwtHeader();
             try
             {
                 // Gửi POST request tới API
@@ -112,6 +141,7 @@ namespace AdminUI.Services
         }
         public async Task<bool> Delete(int id)
         {
+            await AddJwtHeader();
             try
             {
                 // Gửi yêu cầu DELETE tới API
@@ -130,6 +160,7 @@ namespace AdminUI.Services
         }
         public async Task<bool> Recover(ProductModel model)
         {
+            await AddJwtHeader();
             try
             {
                 // Gửi POST request tới API
@@ -149,8 +180,10 @@ namespace AdminUI.Services
         }
         public async Task ExportExcel()
         {
+            await AddJwtHeader();
             var response = await _http.GetAsync("api/Product/export-excel");
             //
         }
+        #endregion
     }
 }

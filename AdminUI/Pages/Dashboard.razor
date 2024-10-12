@@ -1,33 +1,49 @@
 ﻿@page "/dashboard"
-<div class="row">
-    <div class="col-md-7">
-        <div class="row">
-            <div class="col-md-6">
-                <GeneralInfoCard Title="Tổng hàng hóa" Percent="35" Count="4123" BgColor="#7DA0FA"></GeneralInfoCard>
-            </div>
-            <div class="col-md-6">
-                <GeneralInfoCard Title="Tổng nhập kho" Percent="25" Count="3210" BgColor="#4747A1"></GeneralInfoCard>
-            </div>
-            <div class="col-md-6">
-                <GeneralInfoCard Title="Tổng xuất kho" Percent="27" Count="3326" BgColor="#7978E9"></GeneralInfoCard>
-            </div>
-            <div class="col-md-6">
-                <GeneralInfoCard Title="Tổng hàng gửi" Percent="23" Count="3179" BgColor="#F3797E"></GeneralInfoCard>
+@using Microsoft.AspNetCore.Authorization
+@inject NavigationManager Navigation
+@* @inject AuthenticationStateProvider AuthenticationStateProvider *@
+    <div class="row">
+        <div class="col-md-7">
+            <div class="row">
+                <div class="col-md-6">
+                    <GeneralInfoCard Title="Tổng hàng hóa" Percent="35" Count="4123" BgColor="#7DA0FA"></GeneralInfoCard>
+                </div>
+                <div class="col-md-6">
+                    <GeneralInfoCard Title="Tổng nhập kho" Percent="25" Count="3210" BgColor="#4747A1"></GeneralInfoCard>
+                </div>
+                <div class="col-md-6">
+                    <GeneralInfoCard Title="Tổng xuất kho" Percent="27" Count="3326" BgColor="#7978E9"></GeneralInfoCard>
+                </div>
+                <div class="col-md-6">
+                    <GeneralInfoCard Title="Tổng hàng gửi" Percent="23" Count="3179" BgColor="#F3797E"></GeneralInfoCard>
+                </div>
             </div>
         </div>
+        <div class="col-md-5">
+            <ZoneInfoLines></ZoneInfoLines>
+        </div>
     </div>
-    <div class="col-md-5">
-        <ZoneInfoLines></ZoneInfoLines>
+    <div class="row">
+        <div class="col-md-6">
+            <GeneralValueChart></GeneralValueChart>
+        </div>
+        <div class="col-md-6">
+            <GeneralValueChart></GeneralValueChart>
+        </div>
     </div>
-</div>
-<div class="row">
-    <div class="col-md-6">
-        <GeneralValueChart></GeneralValueChart>
-    </div>
-    <div class="col-md-6">
-        <GeneralValueChart></GeneralValueChart>
-    </div>
-</div>
 @code {
+    protected override async Task OnInitializedAsync()
+    {
+        //var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        //var user = authState.User;
 
+        // if (!user.Identity.IsAuthenticated)
+        // {
+        //     Navigation.NavigateTo("login");
+        // }
+        // if (!user.IsInRole("admin"))
+        // {
+        //     Navigation.NavigateTo("access-denied");
+        // }
+    }
 }

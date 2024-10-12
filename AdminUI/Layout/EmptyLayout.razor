@@ -1,0 +1,27 @@
+﻿@inherits LayoutComponentBase
+<div class="main-layout">
+    <nav>
+        <!-- Navigation links -->
+    </nav>
+    <main>
+        @Body
+    </main>
+</div>
+
+<style>
+    .main-layout {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+    }
+
+    nav {
+        /* Styling for navigation */
+    }
+
+    main {
+        flex: 1;
+        padding: 20px;
+    }
+</style>
+@Body

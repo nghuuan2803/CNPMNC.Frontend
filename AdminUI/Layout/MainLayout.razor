@@ -1,86 +1,89 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager Navigation
-
+@inject AuthenticationService AuthService
 
 <MudThemeProvider />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
-
-<MudLayout>
-    <MudAppBar Elevation="10" Dense="@_dense" Style="@($"background:{Colors.Purple.Darken4};")">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
-        E-Warehouse
-        <MudSpacer />
-        <MudPaper Outlined="true">
-            <MudIconButton Icon="@Icons.Material.Filled.Menu" Variant="Variant.Filled" Color="Color.Primary" DropShadow="false" OnClick="@ToggleOpen">@(_openPopup ? "Close" : "Open")</MudIconButton>
-            <MudPopover Open="_openPopup" OverflowBehavior="OverflowBehavior.FlipOnOpen" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopCenter" Paper="false">
-                <MudPaper Outlined="true" Class="px-4 py-8">
-                    <MudText>Scroll your browser to see effect.</MudText>
-                    <MudLink Href="export" OnClick="@(()=>{_openPopup=false;})">Thông báo</MudLink>
-                </MudPaper>
-            </MudPopover>
-        </MudPaper>
-        <MudIconButton Icon="@Icons.Material.Filled.Notifications" Color="Color.Inherit" OnClick="TestRoute" />
-        <MudMenu Class="" Icon="@Icons.Material.Filled.Notifications" Label="A menu with tooltip" Variant="Variant.Filled" Color="Color.Primary">
-            <div class="d-flex align-center">
-                <MudText Class="ml-4">1</MudText>
-                <MudTooltip Text="1 is good option">
-                    <MudIconButton Class="mx-2" Icon="@Icons.Material.Outlined.Info" />
-                </MudTooltip>
-            </div>
-            <div class="d-flex align-center">
-                <MudText Class="ml-4">2</MudText>
-                <MudMenu Icon="@Icons.Material.Outlined.Mouse" ActivationEvent="@MouseEvent.MouseOver" Class="mx-2">
-                    <ChildContent>
-                        <MudMenuItem>Profile</MudMenuItem>
-                        <MudMenuItem>Theme</MudMenuItem>
-                        <MudMenuItem>Usage</MudMenuItem>
-                        <MudMenuItem>Sign Out</MudMenuItem>
-                    </ChildContent>
-                </MudMenu>
-                <MudTooltip Text="2 can be a better option">
-                    <MudIconButton Class="mx-2" Icon="@Icons.Material.Outlined.Info" />
-                </MudTooltip>
-            </div>
-            <div class="d-flex align-center">
-                <MudText Class="ml-4">3</MudText>
-                <MudTooltip Text="3 is one more than 2">
-                    <MudIconButton Class="mx-2" Icon="@Icons.Material.Outlined.Info" />
-                </MudTooltip>
-            </div>
-        </MudMenu>
-        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Href="" Target="_blank" />
-        Hello, An
-    </MudAppBar>
-    <MudDrawer @bind-Open="@_open" ClipMode="_clipMode" Breakpoint="@_breakpoint" Elevation="1" Variant="@DrawerVariant.Mini" OpenMiniOnHover="true">
-        <MudNavMenu Rounded="true" Bordered="true" Color="Color.Primary">
-            <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="dashboard" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
-            <MudNavLink Style="@($"height: 45px;")" Href="product" Icon="@Icons.Material.Filled.Storage">Hàng hóa</MudNavLink>
-            <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="inventory" Icon="@Icons.Material.Filled.Warehouse">Tồn kho</MudNavLink>
-            <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="import" Icon="@Icons.Material.Filled.AddBusiness">Nhập kho</MudNavLink>
-            <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="export" Icon="@Icons.Material.Filled.ContentPasteGo">Xuất kho</MudNavLink>
-            <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="check" Icon="@Icons.Material.Filled.FactCheck">Kiểm kê</MudNavLink>
-            <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="equipment" Icon="@Icons.Material.Filled.Agriculture">Thiết bị vật tư</MudNavLink>
-            <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="dounut-chart" Icon="@Icons.Material.Filled.InsertChart">Thống kê</MudNavLink>
-            <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="weather" Icon="@Icons.Material.Filled.Groups">Nhân sự</MudNavLink>
-            <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="weather" Icon="@Icons.Material.Filled.Settings">Cài đặt</MudNavLink>
-            <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="weather" Icon="@Icons.Material.Filled.Cloud">thời tiết</MudNavLink>
-@*             <MudNavGroup Style="@($"height: 50px;")" IconColor="Color.Info" Title="Nhân sự" Icon="@Icons.Material.Filled.Groups" Expanded="true">
+@* <AuthorizeView> *@
+    <MudLayout>
+        <MudAppBar Elevation="10" Dense="@_dense" Style="@($"background:{Colors.Purple.Darken4};")">
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
+            E-Warehouse
+            <MudSpacer />
+            @* <MudPaper Outlined="true">
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Variant="Variant.Filled" Color="Color.Primary" DropShadow="false" OnClick="@ToggleOpen">@(_openPopup ? "Close" : "Open")</MudIconButton>
+                <MudPopover Open="_openPopup" OverflowBehavior="OverflowBehavior.FlipOnOpen" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopCenter" Paper="false">
+                    <MudPaper Outlined="true" Class="px-4 py-8">
+                        <MudText>Scroll your browser to see effect.</MudText>
+                        <MudLink Href="export" OnClick="@(()=>{_openPopup=false;})">Thông báo</MudLink>
+                    </MudPaper>
+                </MudPopover>
+            </MudPaper> *@
+            
+@*             <MudMenu Class="" Icon="@Icons.Material.Filled.Notifications" Label="A menu with tooltip" Variant="Variant.Filled" Color="Color.Primary">
+                <div class="d-flex align-center">
+                    <MudText Class="ml-4">1</MudText>
+                    <MudTooltip Text="1 is good option">
+                        <MudIconButton Class="mx-2" Icon="@Icons.Material.Outlined.Info" />
+                    </MudTooltip>
+                </div>
+                <div class="d-flex align-center">
+                    <MudText Class="ml-4">2</MudText>
+                    <MudMenu Icon="@Icons.Material.Outlined.Mouse" ActivationEvent="@MouseEvent.MouseOver" Class="mx-2">
+                        <ChildContent>
+                            <MudMenuItem>Profile</MudMenuItem>
+                            <MudMenuItem>Theme</MudMenuItem>
+                            <MudMenuItem>Usage</MudMenuItem>
+                            <MudMenuItem>Sign Out</MudMenuItem>
+                        </ChildContent>
+                    </MudMenu>
+                    <MudTooltip Text="2 can be a better option">
+                        <MudIconButton Class="mx-2" Icon="@Icons.Material.Outlined.Info" />
+                    </MudTooltip>
+                </div>
+                <div class="d-flex align-center">
+                    <MudText Class="ml-4">3</MudText>
+                    <MudTooltip Text="3 is one more than 2">
+                        <MudIconButton Class="mx-2" Icon="@Icons.Material.Outlined.Info" />
+                    </MudTooltip>
+                </div>
+            </MudMenu> *@
+            <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Href="" Target="_blank" />
+            @* Hello, @context.User.Identity?.Name! *@
+            Hello, An
+            <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" OnClick="Logout" />
+        </MudAppBar>
+        <MudDrawer @bind-Open="@_open" ClipMode="_clipMode" Breakpoint="@_breakpoint" Elevation="1" Variant="@DrawerVariant.Mini" OpenMiniOnHover="true">
+            <MudNavMenu Rounded="true" Bordered="true" Color="Color.Primary">
+                <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="dashboard" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
+                <MudNavLink Style="@($"height: 45px;")" Href="product" Icon="@Icons.Material.Filled.Storage">Hàng hóa</MudNavLink>
+                <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="inventory" Icon="@Icons.Material.Filled.Warehouse">Tồn kho</MudNavLink>
+                <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="import" Icon="@Icons.Material.Filled.AddBusiness">Nhập kho</MudNavLink>
+                <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="export" Icon="@Icons.Material.Filled.ContentPasteGo">Xuất kho</MudNavLink>
+                <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="check" Icon="@Icons.Material.Filled.FactCheck">Kiểm kê</MudNavLink>
+                <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="warehouse" Icon="@Icons.Material.Filled.Agriculture">Kho</MudNavLink>
+                <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="dounut-chart" Icon="@Icons.Material.Filled.InsertChart">Thống kê</MudNavLink>
+                <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="employee" Icon="@Icons.Material.Filled.Groups">Nhân sự</MudNavLink>
+                <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="setting" Icon="@Icons.Material.Filled.Settings">Cài đặt</MudNavLink>
+                <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="agency" Icon="@Icons.Material.Filled.Cloud">Đại lý</MudNavLink>
+                @*             <MudNavGroup Style="@($"height: 50px;")" IconColor="Color.Info" Title="Nhân sự" Icon="@Icons.Material.Filled.Groups" Expanded="true">
                 <MudNavLink Style="@($"height: 50px;")" IconColor="_iconColor" Href="staff" Icon="@Icons.Material.Filled.Group">Nhân viên</MudNavLink>
                 <MudNavLink Style="@($"height: 50px;")" IconColor="_iconColor" Href="dounut-chart" Icon="@Icons.Material.Filled.Work">Đối tác</MudNavLink>
                 <MudNavLink Style="@($"height: 50px;")" IconColor="_iconColor" Href="account" Icon="@Icons.Material.Filled.AssignmentInd">Tài khoản</MudNavLink>
-            </MudNavGroup>
-            <MudNavGroup Style="@($"height: 50px;")" IconColor="Color.Info" Title="Settings" Icon="@Icons.Material.Filled.Settings" Expanded="true">
+                </MudNavGroup>
+                <MudNavGroup Style="@($"height: 50px;")" IconColor="Color.Info" Title="Settings" Icon="@Icons.Material.Filled.Settings" Expanded="true">
                 <MudNavLink Style="@($"height: 50px;")" IconColor="_iconColor" Href="configuration" Icon="@Icons.Material.Filled.DisplaySettings">Cấu hình</MudNavLink>
                 <MudNavLink Style="@($"height: 50px;")" IconColor="_iconColor" Href="security" Icon=@Icons.Material.Filled.AdminPanelSettings>Bảo mật</MudNavLink>
-            </MudNavGroup> *@
-        </MudNavMenu>
-    </MudDrawer>
-    <MudMainContent style="background:#F5F7FF;" Class="pt-20 px-10">
-        @Body
-    </MudMainContent>
-</MudLayout>
+                </MudNavGroup> *@
+            </MudNavMenu>
+        </MudDrawer>
+        <MudMainContent style="background:#F5F7FF;" Class="pt-20 px-10">
+            @Body
+        </MudMainContent>
+    </MudLayout>
+@* </AuthorizeView> *@
 @code {
     Color _iconColor = Color.Primary;
     private bool _open = true;
@@ -119,8 +122,9 @@
         public string Link { get; set; }
         public bool IsChecked { get; set; }
     }
-    void TestRoute()
+    async Task Logout()
     {
-        Navigation.NavigateTo("/import");
+        await AuthService.Logout();
+        Navigation.NavigateTo("login");
     }
 }

@@ -1,17 +1,17 @@
-﻿@page "/employee"
+﻿@page "/warehouse"
 @inject IDialogService DialogService
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
-@inject EmployeeServices Service
+@inject WarehouseServices Service
 @inject IJSRuntime JS
 @inject HttpClient Http
 @using System.Net.Http.Json
 @using AdminUI.ApiServices
-@using AdminUI.Dialogs.Employee
+@using AdminUI.Dialogs.Warehouse
 @using ClosedXML.Excel;
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<MudDataGrid T="EmployeeModel" ReadOnly="false" EditMode="DataGridEditMode.Form" QuickFilter="@_quickFilter"
+<MudDataGrid T="WarehouseModel" ReadOnly="false" EditMode="DataGridEditMode.Form" QuickFilter="@_quickFilter"
              Bordered="true" Dense="true" Items="Data" Filterable="false" Hover="true" RowClick="OnRowClick"
              EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column" SelectedItem="tempItem" CommittedItemChanges="CommittedItemChanges"
              Virtualize="true" Loading="loading" Height="400px" FixedHeader="true">
@@ -26,29 +26,24 @@
 
     </ToolBarContent>
     <Columns>
-        <HierarchyColumn T="EmployeeModel" ButtonDisabledFunc="@(x => x.Id == "He")" />
-        <PropertyColumn Class="w-1" Property="x => x.Id" Title="Mã NV" Editable="false" />
-        <PropertyColumn Property="x => x.FirstName" Title="Họ" />
-        <PropertyColumn Property="x => x.LastName" Title="Tên" />
-        <PropertyColumn Property="x => x.Salary" Title="Lương" />
+        <HierarchyColumn T="WarehouseModel" ButtonDisabledFunc="@(x => x.Name == "He")" />
+        <PropertyColumn Class="w-1" Property="x => x.Id" Title="Id" Editable="false" />
+        <PropertyColumn Property="x => x.Name" Title="Tên chi nhánh" />
+        <PropertyColumn Property="x => x.PhoneNumber" Title="SĐT" />
+        <PropertyColumn Property="x => x.Email" Title="Email" />
         <TemplateColumn Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-center">
             <CellTemplate>
                 <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Color="Color.Warning" OnClick="@context.Actions.StartEditingItemAsync" />
                 <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="()=> ShowDeleteConfirmation(context.Item)" />
-                @if (context.Item.Status != 0)
-                {
-                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.LockPerson" Color="Color.Dark" OnClick="()=> ShowDeleteConfirmation(context.Item)" />
-                }
+                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.MoreVert" Color="Color.Dark" OnClick="()=> ShowDeleteConfirmation(context.Item)" />
             </CellTemplate>
         </TemplateColumn>
     </Columns>
     <ChildRowContent>
         <MudText>Địa chỉ: @context.Item.Address</MudText>
-        <MudText>Email: @context.Item.Email</MudText>
-        <MudText>SĐT: @context.Item.PhoneNumber</MudText>
     </ChildRowContent>
     <PagerContent>
-        <MudDataGridPager T="EmployeeModel" />
+        <MudDataGridPager T="WarehouseModel" />
     </PagerContent>
 </MudDataGrid>
 <script>
@@ -75,10 +70,10 @@
     #region fields - Properties
     private bool loading = true;
     private List<string> _events = new();
-    public List<EmployeeModel> Data { get; set; } = new List<EmployeeModel>();
-    public List<EmployeeModel> ExcelData { get; set; }
+    public List<WarehouseModel> Data { get; set; } = new List<WarehouseModel>();
+    public List<WarehouseModel> ExcelData { get; set; }
     string _searchString = null!;
-    EmployeeModel tempItem = null!;
+    WarehouseModel tempItem = null!;
     IList<IBrowserFile> _files = new List<IBrowserFile>();
     #endregion
 
@@ -104,7 +99,7 @@
         catch
         {
             Snackbar.Add("Gọi API thất bại, vui lòng kiểm tra lại server!", Severity.Error);
-            //Snackbar.Add("Tạm thời sử dụng dữ liệu giả!", Severity.Warning);
+            Snackbar.Add("Tạm thời sử dụng dữ liệu giả!", Severity.Warning);
         }
         finally
         {
@@ -120,42 +115,36 @@
 
 
     //Tìm kiếm
-    private Func<EmployeeModel, bool> _quickFilter => x =>
+    private Func<WarehouseModel, bool> _quickFilter => x =>
     {
         if (string.IsNullOrWhiteSpace(_searchString))
             return true;
 
-        if (x.Id.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+        if (x.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
-        if (x.FirstName.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-
-        if (x.LastName.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-
-        if ($"{x.Address} {x.Email} {x.PhoneNumber}".Contains(_searchString))
+        if ($"{x.Id} {x.Address} {x.Email} {x.PhoneNumber}".Contains(_searchString))
             return true;
 
         return false;
     };
-    private void OnRowClick(DataGridRowClickEventArgs<EmployeeModel> args)
+    private void OnRowClick(DataGridRowClickEventArgs<WarehouseModel> args)
     {
         OpenViewDialog(args.Item);
         StateHasChanged();
     }
-    void StartedEditingItem(EmployeeModel item)
+    void StartedEditingItem(WarehouseModel item)
     {
         _events.Insert(0, $"Event = StartedEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
         tempItem = item;
     }
 
-    void CanceledEditingItem(EmployeeModel item)
+    void CanceledEditingItem(WarehouseModel item)
     {
         _events.Insert(0, $"Event = CanceledEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
     }
 
-    async void CommittedItemChanges(EmployeeModel item)
+    async void CommittedItemChanges(WarehouseModel item)
     {
         _events.Insert(0, $"Event = CommittedItemChanges, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
         var result = await Service.Update(item);
@@ -182,12 +171,12 @@
     #endregion
 
     #region Xóa
-    private async Task ShowDeleteConfirmation(EmployeeModel item)
+    private async Task ShowDeleteConfirmation(WarehouseModel item)
     {
-        var parameters = new DialogParameters { ["Message"] = $"Hãy cân nhắc kỹ trước khi xóa {item.FirstName} {item.LastName}" };
+        var parameters = new DialogParameters { ["Message"] = $"Hãy cân nhắc kỹ trước khi xóa {item.Name}" };
         var options = new DialogOptions { CloseButton = false, CloseOnEscapeKey = true };
 
-        var dialog = DialogService.Show<ConfirmDialog>("Xác nhận xóa?", parameters, options);
+        var dialog = DialogService.Show<ConfirmDialog>("Confirm Delete", parameters, options);
         var result = await dialog.Result;
 
         if (!result!.Canceled)
@@ -199,10 +188,10 @@
     {
         loading = true;
         var options = new DialogOptions { CloseOnEscapeKey = true };
-        var dialog = await DialogService.ShowAsync<AddEmployeeDialog>("Thêm nhân viên", options);
+        var dialog = await DialogService.ShowAsync<AddWarehouseDialog>("Thêm kho", options);
         var result = await dialog.Result;
 
-        if (!result.Canceled && result.Data is EmployeeModel model)
+        if (!result.Canceled && result.Data is WarehouseModel model)
         {
             // Thêm sản phẩm mới vào danh sách
             await Task.Delay(500);
@@ -221,7 +210,7 @@
         loading = false;
     }
 
-    private async void DeleteItem(EmployeeModel item)
+    private async void DeleteItem(WarehouseModel item)
     {
 
         var result = await Service.Delete(item.Id); //gọi api xóa trên server
@@ -245,11 +234,11 @@
         Navigation.NavigateTo(page);
     }
 
-    private void OpenViewDialog(EmployeeModel model)
+    private void OpenViewDialog(WarehouseModel model)
     {
         var parameters = new DialogParameters { ["Data"] = model }; //gửi tham chiếu tới dialog
         var options = new DialogOptions { CloseOnEscapeKey = true }; //cho phép tắt dialog khi bấm nút Esc
 
-        DialogService.Show<EmployeeViewDialog>("Thông nhân viên", parameters, options); //Bật dialog
+        DialogService.Show<WarehouseViewDialog>("Thông tin kho", parameters, options); //Bật dialog
     }
 }

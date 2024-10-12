@@ -1,0 +1,55 @@
+﻿<MudDialog>
+    <DialogContent>
+        <MudForm @ref="form" Spacing="spacing" style="width:400px">
+            <MudTextField  Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Mã kho" @bind-Value="id" Required="true" RequiredError="Name is required" />
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Tên kho" @bind-Value="name" />
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Email" @bind-Value="email" />
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Số điện thoại" @bind-Value="phone" />
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Địa chỉ" @bind-Value="address" />
+            @*             <div class="d-flex">
+            <MudRadioGroup T="string" @bind-Value="category">
+            <MudRadio  Value=@("Personal")>Personal</MudRadio>
+            <MudRadio Value=@("Professional")>Professional</MudRadio>
+            </MudRadioGroup>
+            </div> *@
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Tertiary" OnClick="SubmitForm">Xác nhận</MudButton>
+        <MudButton Variant="Variant.Text" Color="Color.Secondary" OnClick="Cancel">Hủy</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    private MudForm form;
+
+    private string id;
+    private string name;
+    private string email;
+    private string phone;
+    private string address;
+    //private string category = "Personal"; // Default value
+
+    private async Task SubmitForm()
+    {
+        await form.Validate();
+        if (form.IsValid)
+        {
+            // Form is valid, close the dialog and pass the data
+            var formData = new WarehouseModel(id,name,address,email,phone);
+            MudDialog.Close(DialogResult.Ok(formData));
+        }
+    }
+
+    private void OnInvalidSubmit()
+    {
+        // Handle invalid form submission (e.g., display error messages)
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    int spacing = 0;
+}

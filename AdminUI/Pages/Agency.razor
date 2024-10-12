@@ -1,17 +1,17 @@
-﻿@page "/employee"
+﻿@page "/agency"
 @inject IDialogService DialogService
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
-@inject EmployeeServices Service
+@inject AgencyServices Service
 @inject IJSRuntime JS
 @inject HttpClient Http
 @using System.Net.Http.Json
 @using AdminUI.ApiServices
-@using AdminUI.Dialogs.Employee
+@using AdminUI.Dialogs.Agency
 @using ClosedXML.Excel;
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<MudDataGrid T="EmployeeModel" ReadOnly="false" EditMode="DataGridEditMode.Form" QuickFilter="@_quickFilter"
+<MudDataGrid T="AgencyModel" ReadOnly="false" EditMode="DataGridEditMode.Form" QuickFilter="@_quickFilter"
              Bordered="true" Dense="true" Items="Data" Filterable="false" Hover="true" RowClick="OnRowClick"
              EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column" SelectedItem="tempItem" CommittedItemChanges="CommittedItemChanges"
              Virtualize="true" Loading="loading" Height="400px" FixedHeader="true">
@@ -26,16 +26,18 @@
 
     </ToolBarContent>
     <Columns>
-        <HierarchyColumn T="EmployeeModel" ButtonDisabledFunc="@(x => x.Id == "He")" />
-        <PropertyColumn Class="w-1" Property="x => x.Id" Title="Mã NV" Editable="false" />
-        <PropertyColumn Property="x => x.FirstName" Title="Họ" />
-        <PropertyColumn Property="x => x.LastName" Title="Tên" />
-        <PropertyColumn Property="x => x.Salary" Title="Lương" />
+        <HierarchyColumn T="AgencyModel" ButtonDisabledFunc="@(x => x.Name == "He")" />
+        <PropertyColumn Class="w-1" Property="x => x.Id" Title="Mã ĐL" Editable="false" />
+        <PropertyColumn Property="x => x.Name" Title="Tên ĐL" />
+        <PropertyColumn Property="x => x.Address" Title="Địa chỉ" />
+        <PropertyColumn Property="x => x.Email" Title="Email" />
+        <PropertyColumn Property="x => x.PhoneNumber" Title="SĐT" />
+        <PropertyColumn Property="x => x.ContactPerson" Title="Người liên hệ" />
         <TemplateColumn Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-center">
             <CellTemplate>
                 <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Color="Color.Warning" OnClick="@context.Actions.StartEditingItemAsync" />
                 <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="()=> ShowDeleteConfirmation(context.Item)" />
-                @if (context.Item.Status != 0)
+                @if (context.Item.Discontinued)
                 {
                     <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.LockPerson" Color="Color.Dark" OnClick="()=> ShowDeleteConfirmation(context.Item)" />
                 }
@@ -48,7 +50,7 @@
         <MudText>SĐT: @context.Item.PhoneNumber</MudText>
     </ChildRowContent>
     <PagerContent>
-        <MudDataGridPager T="EmployeeModel" />
+        <MudDataGridPager T="AgencyModel" />
     </PagerContent>
 </MudDataGrid>
 <script>
@@ -75,10 +77,10 @@
     #region fields - Properties
     private bool loading = true;
     private List<string> _events = new();
-    public List<EmployeeModel> Data { get; set; } = new List<EmployeeModel>();
-    public List<EmployeeModel> ExcelData { get; set; }
+    public List<AgencyModel> Data { get; set; } = new List<AgencyModel>();
+    public List<AgencyModel> ExcelData { get; set; }
     string _searchString = null!;
-    EmployeeModel tempItem = null!;
+    AgencyModel tempItem = null!;
     IList<IBrowserFile> _files = new List<IBrowserFile>();
     #endregion
 
@@ -120,42 +122,39 @@
 
 
     //Tìm kiếm
-    private Func<EmployeeModel, bool> _quickFilter => x =>
+    private Func<AgencyModel, bool> _quickFilter => x =>
     {
         if (string.IsNullOrWhiteSpace(_searchString))
             return true;
 
-        if (x.Id.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+        if (x.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
-        if (x.FirstName.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+        if (x.Email.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
-        if (x.LastName.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-
-        if ($"{x.Address} {x.Email} {x.PhoneNumber}".Contains(_searchString))
+        if ($"{x.Id} {x.ContactPerson} {x.Email} {x.PhoneNumber}".Contains(_searchString))
             return true;
 
         return false;
     };
-    private void OnRowClick(DataGridRowClickEventArgs<EmployeeModel> args)
+    private void OnRowClick(DataGridRowClickEventArgs<AgencyModel> args)
     {
         OpenViewDialog(args.Item);
         StateHasChanged();
     }
-    void StartedEditingItem(EmployeeModel item)
+    void StartedEditingItem(AgencyModel item)
     {
         _events.Insert(0, $"Event = StartedEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
         tempItem = item;
     }
 
-    void CanceledEditingItem(EmployeeModel item)
+    void CanceledEditingItem(AgencyModel item)
     {
         _events.Insert(0, $"Event = CanceledEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
     }
 
-    async void CommittedItemChanges(EmployeeModel item)
+    async void CommittedItemChanges(AgencyModel item)
     {
         _events.Insert(0, $"Event = CommittedItemChanges, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
         var result = await Service.Update(item);
@@ -182,9 +181,9 @@
     #endregion
 
     #region Xóa
-    private async Task ShowDeleteConfirmation(EmployeeModel item)
+    private async Task ShowDeleteConfirmation(AgencyModel item)
     {
-        var parameters = new DialogParameters { ["Message"] = $"Hãy cân nhắc kỹ trước khi xóa {item.FirstName} {item.LastName}" };
+        var parameters = new DialogParameters { ["Message"] = $"Hãy cân nhắc kỹ trước khi xóa {item.Name}" };
         var options = new DialogOptions { CloseButton = false, CloseOnEscapeKey = true };
 
         var dialog = DialogService.Show<ConfirmDialog>("Xác nhận xóa?", parameters, options);
@@ -199,10 +198,10 @@
     {
         loading = true;
         var options = new DialogOptions { CloseOnEscapeKey = true };
-        var dialog = await DialogService.ShowAsync<AddEmployeeDialog>("Thêm nhân viên", options);
+        var dialog = await DialogService.ShowAsync<AddAgencyDialog>("Thêm Đại lý", options);
         var result = await dialog.Result;
 
-        if (!result.Canceled && result.Data is EmployeeModel model)
+        if (!result.Canceled && result.Data is AgencyModel model)
         {
             // Thêm sản phẩm mới vào danh sách
             await Task.Delay(500);
@@ -210,7 +209,7 @@
             if (formResult)
             {
                 Data.Insert(0, model);
-                Snackbar.Add("Đã thêm kho thành công!", Severity.Success);
+                Snackbar.Add("Đã thêm đại lý thành công!", Severity.Success);
                 StateHasChanged();
             }
             else
@@ -221,7 +220,7 @@
         loading = false;
     }
 
-    private async void DeleteItem(EmployeeModel item)
+    private async void DeleteItem(AgencyModel item)
     {
 
         var result = await Service.Delete(item.Id); //gọi api xóa trên server
@@ -245,11 +244,11 @@
         Navigation.NavigateTo(page);
     }
 
-    private void OpenViewDialog(EmployeeModel model)
+    private void OpenViewDialog(AgencyModel model)
     {
         var parameters = new DialogParameters { ["Data"] = model }; //gửi tham chiếu tới dialog
         var options = new DialogOptions { CloseOnEscapeKey = true }; //cho phép tắt dialog khi bấm nút Esc
 
-        DialogService.Show<EmployeeViewDialog>("Thông nhân viên", parameters, options); //Bật dialog
+        DialogService.Show<AgencyViewDialog>("Thông nhân viên", parameters, options); //Bật dialog
     }
 }
