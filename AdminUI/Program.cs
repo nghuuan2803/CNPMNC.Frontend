@@ -23,6 +23,7 @@ namespace AdminUI
             builder.Services.AddScoped<WarehouseServices>();
             builder.Services.AddScoped<EmployeeServices>();
             builder.Services.AddScoped<AgencyServices>();
+            builder.Services.AddScoped<ImportServices>();
 
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:5000") });

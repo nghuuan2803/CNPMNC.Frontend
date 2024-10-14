@@ -15,6 +15,14 @@ namespace AdminUI.Helper
             CreateMap<EmployeeModel, EmployeeForm>()
                 .ForMember(dest => dest.BirthDate, opt => opt.MapFrom(src => src.BirthDate.ToDateTime(TimeOnly.MinValue)))
                 .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate.HasValue ? src.StartDate.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null));
+
+            CreateMap<ProductModel, SelectImportItem>()
+                .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
+
+            CreateMap<SelectImportItem, ImportItem>()
+                .ForMember(dest => dest.UnitPrice, opt => opt.MapFrom(src => src.ImportPrice))
+                .ForMember(dest => dest.Quantity, opt => opt.MapFrom(src => src.ImportQty));
         }
     }
 }

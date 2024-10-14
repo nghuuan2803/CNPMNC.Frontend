@@ -1,6 +1,4 @@
-﻿
-
-namespace AdminUI.Objects
+﻿namespace AdminUI.Objects
 {
     public class ProductModel
     {

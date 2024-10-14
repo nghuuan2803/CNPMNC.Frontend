@@ -1,0 +1,60 @@
+﻿@using AutoMapper
+@using System.Net.Http.Json
+@inject IMapper Mapper
+
+<style>
+    .tab{
+        width:300px;
+    }
+</style>
+
+<MudDialog>
+    <DialogContent>
+        <MudTabs Elevation="2" Rounded="true" Centered="false" Class="my-6" Color="Color.Inherit" Position="Position.Top">
+            <MudTabPanel Class="tab" Icon="@Icons.Material.Filled.Api" Text="Nguồn nhập" BadgeData='"!"' BadgeColor="Color.Error">
+                <MudText>
+                    Chọn nhà cung cấp
+                </MudText>
+            </MudTabPanel>
+            <MudTabPanel Icon="@Icons.Material.Filled.Build" Text="Chọn" BadgeData="1" BadgeColor="Color.Success">
+                <AdminUI.Pages.DonutChart></AdminUI.Pages.DonutChart>
+            </MudTabPanel>
+            <MudTabPanel Icon="@Icons.Material.Filled.Build" Text="Kết quả" Disabled="true" BadgeData="1" BadgeColor="Color.Success">
+                <AdminUI.Pages.DonutChart></AdminUI.Pages.DonutChart>
+            </MudTabPanel>
+        </MudTabs>
+    </DialogContent>
+@*     <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Tertiary" OnClick="SubmitForm">Xác nhận</MudButton>
+        <MudButton Variant="Variant.Text" Color="Color.Secondary" OnClick="Cancel">Hủy</MudButton>
+    </DialogActions> *@
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    private MudForm form;
+    public AgencyModel Data { get; set; } = new();
+
+    private async Task SubmitForm()
+    {
+        await form.Validate();
+        if (form.IsValid)
+        {
+            //var result = Mapper.Map<AgencyModel>(Data);
+            // Form is valid, close the dialog and pass the data
+            MudDialog.Close(DialogResult.Ok(Data));
+        }
+    }
+
+
+    private void OnInvalidSubmit()
+    {
+        // Handle invalid form submission (e.g., display error messages)
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    int spacing = 0;
+}

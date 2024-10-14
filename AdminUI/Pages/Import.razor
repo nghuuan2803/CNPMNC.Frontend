@@ -1,6 +1,390 @@
 ﻿@page "/import"
-<h3>Import</h3>
 
+@inject IDialogService DialogService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@inject ImportServices Service
+@inject ProductService ProductService
+@inject IJSRuntime JS
+@inject HttpClient Http
+@inject IMapper Mapper
+@using System.Net.Http.Json
+@using AdminUI.ApiServices
+@using AdminUI.Dialogs.Import
+@using AutoMapper
+@using ClosedXML.Excel
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<MudTabs Elevation="0" Rounded="false" Centered="true">
+    <MudTabPanel Icon="@Icons.Material.Filled.History" Text="Lịch sử" BadgeColor="Color.Info">
+        <div class="pt-10 px-10">
+            <MudDataGrid T="ImportModel" ReadOnly="false" EditMode="DataGridEditMode.Form" QuickFilter="@_quickFilter"
+                         Bordered="true" Dense="true" Items="Data" Filterable="false" Hover="true" RowClick="OnRowClick"
+                         EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column" SelectedItem="tempItem" CommittedItemChanges="CommittedItemChanges"
+                         Virtualize="true" Loading="loading" Height="400px" FixedHeader="true">
+                <ToolBarContent>
+
+                    <MudTooltip Text="Thêm kho">
+                        <MudIconButton Color="Color.Tertiary" Icon="@Icons.Material.Filled.Add" @onclick="OpenAddDialogAsync"></MudIconButton>
+                    </MudTooltip>
+                    <MudSpacer />
+                    <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.End" Immediate="true"
+                                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+
+                </ToolBarContent>
+                <Columns>
+                    <HierarchyColumn T="ImportModel" ButtonDisabledFunc="@(x => x.Id == 0)" />
+                    <PropertyColumn Class="w-1" Property="x => x.Id" Title="Mã đơn" Editable="false" />
+                    <PropertyColumn Property="x => x.WarehouseName" Title="Kho" />
+                    <PropertyColumn Property="x => x.SuplierName" Title="Nhà cung cấp" />
+                    <PropertyColumn Property="x => x.Amount" Title="Tiền nhập" />
+                    <PropertyColumn Format="dd/MM/yyyy" Property="x => x.CreatedOn" Title="Ngày nhập" />
+                    <PropertyColumn Property="x => x.ManagerName" Title="Người nhập" />
+
+                    <TemplateColumn Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-center">
+                        <CellTemplate>
+                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Color="Color.Warning" OnClick="@context.Actions.StartEditingItemAsync" />
+                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="()=> ShowDeleteConfirmation(context.Item)" />
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+                <ChildRowContent>
+                    <MudText>Ngày hoàn thành: @context.Item.CompletedDate</MudText>
+                </ChildRowContent>
+                <PagerContent>
+                    <MudDataGridPager T="ImportModel" />
+                </PagerContent>
+            </MudDataGrid>
+        </div>
+    </MudTabPanel>
+    <MudTabPanel OnClick="LoadProductData" Text="Nhập hàng" Icon="@Icons.Material.Filled.SelectAll">
+        <div class="pt-10 px-10">
+            <MudDataGrid T="SelectImportItem" ReadOnly="false" EditMode="DataGridEditMode.Form" QuickFilter="@_quickFilterProduct"
+                         Bordered="true" Dense="true" Items="ItemList" Filterable="false" Hover="true" CommittedItemChanges="SeclectItemCommit"
+                         EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column"
+                         Virtualize="true" Loading="loading" Height="400px" FixedHeader="true">
+                <ToolBarContent>
+                    <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.End" Immediate="true"
+                                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                </ToolBarContent>
+                <Columns>
+                    <PropertyColumn Style="width:200px" Property="x => x.Id" Title="Id" Editable="false" />
+                    <PropertyColumn Property="x => x.Name" Title="Sản phẩm" Editable="false" />
+                    <PropertyColumn Property="x => x.ImportQty" Title="Số lượng nhập" />
+                    <PropertyColumn Property="x => x.ImportPrice" Title="Giá nhập" />
+                    <TemplateColumn Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-end">
+                        <CellTemplate>
+                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Add" Color="Color.Warning" OnClick="context.Actions.StartEditingItemAsync" />
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+                <PagerContent>
+                    <MudDataGridPager T="SelectImportItem" />
+                </PagerContent>
+            </MudDataGrid>
+        </div>
+    </MudTabPanel>
+    <MudTabPanel Icon="@Icons.Material.Filled.BugReport" BadgeData='_selectedCount' BadgeColor="Color.Error">
+        <div class="pt-10 px-10">
+            <MudButton OnClick="Submit">Xác nhận</MudButton>
+            <MudDataGrid T="SelectImportItem" ReadOnly="false" EditMode="DataGridEditMode.Form"
+                         Bordered="true" Dense="true" Items="SelectedItem" Filterable="false" Hover="true" CommittedItemChanges="SeclectItemCommit"
+                         EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column"
+                         Virtualize="true" Loading="loading" Height="400px" FixedHeader="true">
+                <Columns>
+                    <PropertyColumn Style="width:200px" Property="x => x.Id" Title="Id" Editable="false" />
+                    <PropertyColumn Property="x => x.Name" Title="Sản phẩm" Editable="false" />
+                    <PropertyColumn Property="x => x.ImportQty" Title="Số lượng nhập" />
+                    <PropertyColumn Property="x => x.ImportPrice" Title="Giá nhập" />
+                    <TemplateColumn Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-end">
+                        <CellTemplate>
+                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Remove" Color="Color.Warning" OnClick="context.Actions.StartEditingItemAsync" />
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+                <PagerContent>
+                    <MudDataGridPager T="SelectImportItem" />
+                </PagerContent>
+            </MudDataGrid>
+        </div>
+    </MudTabPanel>
+    <MudTabPanel Icon="@Icons.Material.Filled.AccessTime" BadgeData='string.Empty' BadgeDot="true" BadgeColor="Color.Success" />
+</MudTabs>
+
+<script>
+    window.downloadFileFromByteArray = (fileName, byteArray) => {
+        // Tạo Blob từ byte array
+        var blob = new Blob([byteArray], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        var url = URL.createObjectURL(blob);
+
+        // Tạo thẻ <a> để tải file xuống
+        var anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = fileName;
+
+        // Thêm thẻ <a> vào DOM và click để tải file
+        document.body.appendChild(anchor);
+        anchor.click();
+
+        // Sau đó xóa thẻ <a> đi để dọn dẹp
+        document.body.removeChild(anchor);
+        URL.revokeObjectURL(url);
+    };
+</script>
 @code {
+    #region fields - Properties
+    private bool loading = true;
+    private List<string> _events = new();
+    public List<ImportModel> Data { get; set; } = new List<ImportModel>();
+    public List<ImportModel> ExcelData { get; set; }
+    public List<ProductModel> ProductData { get; set; }
+    public List<SelectImportItem> ItemList { get; set; }
+    public List<SelectImportItem> SelectedItem { get; set; } = new();
+    string _searchString = null!;
+    ImportModel tempItem = null!;
+    IList<IBrowserFile> _files = new List<IBrowserFile>();
+    private readonly DialogOptions dialogOptions = new() { MaxWidth = MaxWidth.Medium, FullWidth = true };
 
+    bool _loadProduct = false;
+    int _selectedCount = 0;
+    #endregion
+
+    #region ImportData
+    protected async override Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        if (!user.Identity.IsAuthenticated)
+        {
+            Navigation.NavigateTo("login");
+        }
+        if (!user.IsInRole("admin"))
+        {
+            Navigation.NavigateTo("access-denied");
+        }
+        try
+        {
+            await Task.Delay(100);
+            loading = true;
+            Data = await Service.GetAllAsync();
+        }
+        catch
+        {
+            Snackbar.Add("Gọi API thất bại, vui lòng kiểm tra lại server!", Severity.Error);
+            //Snackbar.Add("Tạm thời sử dụng dữ liệu giả!", Severity.Warning);
+        }
+        finally
+        {
+            loading = false;
+        }
+
+    }
+
+    //Tìm kiếm
+    private Func<ImportModel, bool> _quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+
+        // if (x.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+        //     return true;
+
+        // if (x.Email.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+        //     return true;
+
+        if ($"{x.Id} {x.SuplierId}".Contains(_searchString))
+            return true;
+
+        return false;
+    };
+    private void OnRowClick(DataGridRowClickEventArgs<ImportModel> args)
+    {
+        OpenViewDialog(args.Item);
+        StateHasChanged();
+    }
+    void StartedEditingItem(ImportModel item)
+    {
+        _events.Insert(0, $"Event = StartedEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
+        tempItem = item;
+    }
+
+    void CanceledEditingItem(ImportModel item)
+    {
+        _events.Insert(0, $"Event = CanceledEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
+    }
+
+    async void CommittedItemChanges(ImportModel item)
+    {
+        _events.Insert(0, $"Event = CommittedItemChanges, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
+        var result = await Service.Update(item);
+        if (!result)
+        {
+            Snackbar.Add("Không thể cập nhật!", Severity.Error);
+            Data.Remove(item);
+            Data.Insert(0, tempItem);
+            StateHasChanged();
+        }
+        else
+        {
+            Snackbar.Add("Đã cập nhật sản phẩm thành công!", Severity.Success);
+        }
+    }
+    void ShowMessage(string msg, string key = null!)
+    {
+        var config = (SnackbarOptions options) =>
+        {
+            options.DuplicatesBehavior = SnackbarDuplicatesBehavior.Prevent;
+        };
+        Snackbar.Add(msg, Severity.Info, configure: config, key: key);
+    }
+
+
+    private async Task ShowDeleteConfirmation(ImportModel item)
+    {
+        var parameters = new DialogParameters { ["Message"] = $"Hãy cân nhắc kỹ trước khi xóa đơn [{item.Id}]" };
+        var options = new DialogOptions { CloseButton = false, CloseOnEscapeKey = true };
+
+        var dialog = DialogService.Show<ConfirmDialog>("Xác nhận xóa?", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result!.Canceled)
+        {
+            DeleteItem(item);
+        }
+    }
+    private async Task OpenAddDialogAsync()
+    {
+        loading = true;
+        var options = new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseOnEscapeKey = true, NoHeader = true };
+        var dialog = await DialogService.ShowAsync<AddImportDialog>("Tạo đơn nhập", options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is ImportModel model)
+        {
+            // Thêm sản phẩm mới vào danh sách
+            await Task.Delay(500);
+            bool formResult = await Service.CreateAsync(model);
+            if (formResult)
+            {
+                Data.Insert(0, model);
+                Snackbar.Add("Đã thêm đại lý thành công!", Severity.Success);
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add("Đã xảy ra lỗi :(", Severity.Error);
+            }
+        }
+        loading = false;
+    }
+
+    private async void DeleteItem(ImportModel item)
+    {
+
+        var result = await Service.Delete(item.Id); //gọi api xóa trên server
+        if (result == true) //kiểm tra kết quả
+        {
+            Data.Remove(item); //Xóa tại frontend
+            StateHasChanged();
+            //Snackbar.Add($"Xóa thành công", Severity.Info);
+            //tạo toast thông báo
+            Snackbar.Add($"Xóa thành công", Severity.Info);
+        }
+        else
+        {
+            Snackbar.Add($"Không thể xóa", Severity.Error);
+        }
+    }
+
+
+    private void NavigateTo(string page)
+    {
+        Navigation.NavigateTo(page);
+    }
+
+    private void OpenViewDialog(ImportModel model)
+    {
+        var parameters = new DialogParameters { ["Data"] = model }; //gửi tham chiếu tới dialog
+        var options = new DialogOptions { CloseOnEscapeKey = true }; //cho phép tắt dialog khi bấm nút Esc
+
+        DialogService.Show<ImportViewDialog>("Thông nhân viên", parameters, options); //Bật dialog
+    }
+    #endregion
+
+    #region ProductData
+    private Func<SelectImportItem, bool> _quickFilterProduct => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+
+        if (x.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if ($"{x.Id}".Contains(_searchString))
+            return true;
+
+        return false;
+    };
+
+    private async Task OpenAddItemDialog(SelectImportItem item)
+    {
+
+    }
+
+    private void SeclectItemCommit(SelectImportItem item)
+    {
+        if (!SelectedItem.Contains(item) && item.ImportQty != 0 && item.ImportPrice != 0)
+        {
+            SelectedItem.Add(item);
+            _selectedCount++;
+        }
+        else if (SelectedItem.Contains(item) && (item.ImportPrice == 0 || item.ImportQty == 0))
+        {
+            SelectedItem.Remove(item);
+            item.ImportQty = 0;
+            item.ImportPrice = 0;
+            _selectedCount--;
+            Snackbar.Add("Số lượng và giá phải khác 0", Severity.Error);
+        }
+        else
+        {
+            item.ImportQty = 0;
+            item.ImportPrice = 0;
+            Snackbar.Add("Số lượng và giá phải khác 0", Severity.Error);
+        }
+    }
+
+    private async Task LoadProductData()
+    {
+        if (!_loadProduct)
+        {
+            ProductData = await ProductService.GetAllAsync();
+            ItemList = Mapper.Map<List<SelectImportItem>>(ProductData);
+            _loadProduct = true;
+        }
+    }
+
+    private async Task Submit()
+    {
+        var items = Mapper.Map<List<ImportItem>>(SelectedItem);
+        var data = new ImportModel
+            {
+                SuplierId = 1,
+                OrderBy = "1",
+                WarehouseId = "WH001",
+                CreatedOn = DateTime.Now,
+                Amount = items.Sum(a => a.Quantity * a.UnitPrice),
+                Items = items
+            };
+        var result = await Service.CreateAsync(data);
+        if(result)
+        {
+            Snackbar.Add("Ok", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add("Faild", Severity.Error);            
+        }
+    }
+    #endregion
 }
