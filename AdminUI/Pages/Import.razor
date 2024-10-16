@@ -152,22 +152,22 @@
     #region ImportData
     protected async override Task OnInitializedAsync()
     {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-        if (!user.Identity.IsAuthenticated)
-        {
-            Navigation.NavigateTo("login");
-        }
-        if (!user.IsInRole("admin"))
-        {
-            Navigation.NavigateTo("access-denied");
-        }
-        try
-        {
-            await Task.Delay(100);
-            loading = true;
-            Data = await Service.GetAllAsync();
-        }
+        // var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        // var user = authState.User;
+        // if (!user.Identity.IsAuthenticated)
+        // {
+        //     Navigation.NavigateTo("login");
+        // }
+        // if (!user.IsInRole("admin"))
+        // {
+        //     Navigation.NavigateTo("access-denied");
+        // }
+        // try
+        // {
+        //     await Task.Delay(100);
+        //     loading = true;
+        //     Data = await Service.GetAllAsync();
+        // }
         catch
         {
             Snackbar.Add("Gọi API thất bại, vui lòng kiểm tra lại server!", Severity.Error);

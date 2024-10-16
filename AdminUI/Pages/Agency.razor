@@ -87,16 +87,16 @@
     #region Life cycle
     protected async override Task OnInitializedAsync()
     {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-        if (!user.Identity.IsAuthenticated)
-        {
-            Navigation.NavigateTo("login");
-        }
-        if (!user.IsInRole("admin"))
-        {
-            Navigation.NavigateTo("access-denied");
-        }
+        // var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        // var user = authState.User;
+        // if (!user.Identity.IsAuthenticated)
+        // {
+        //     Navigation.NavigateTo("login");
+        // }
+        // if (!user.IsInRole("admin"))
+        // {
+        //     Navigation.NavigateTo("access-denied");
+        // }
         try
         {
             await Task.Delay(100);
