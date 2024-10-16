@@ -162,12 +162,12 @@
         // {
         //     Navigation.NavigateTo("access-denied");
         // }
-        // try
-        // {
-        //     await Task.Delay(100);
-        //     loading = true;
-        //     Data = await Service.GetAllAsync();
-        // }
+        try
+        {
+            await Task.Delay(100);
+            loading = true;
+            Data = await Service.GetAllAsync();
+        }
         catch
         {
             Snackbar.Add("Gọi API thất bại, vui lòng kiểm tra lại server!", Severity.Error);
