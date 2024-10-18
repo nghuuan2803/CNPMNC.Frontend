@@ -1,29 +1,29 @@
-﻿using AdminUI.Objects;
-using AdminUI.Objects.Response;
-using System.Net.Http.Json;
+﻿using AdminUI.Objects.Response;
+using AdminUI.Objects;
 using Blazored.LocalStorage;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using AdminUI.Objects.Request;
 
 namespace AdminUI.ApiServices
 {
-    public class WarehouseServices
+    public class ExportServices
     {
         private readonly HttpClient _http;
         private readonly ILocalStorageService _localStorage;
 
-        public WarehouseServices(HttpClient httpClient, ILocalStorageService localStorage)
+        public ExportServices(HttpClient httpClient, ILocalStorageService localStorage)
         {
             _http = httpClient;
             _localStorage = localStorage;
         }
-        public WarehouseServices() { }
 
-        public async Task<List<WarehouseModel>> GetAllAsync()
+        public async Task<List<ExportModel>> GetAllAsync()
         {
             try
             {
                 //await AddJwtHeader();
-                var result = await _http.GetFromJsonAsync<WarehouseListResponse>("api/Warehouse/get-all");
+                var result = await _http.GetFromJsonAsync<ExportListResponse>("api/Export/get-all");
                 return result.Data;
             }
             catch (Exception ex)
@@ -32,26 +32,26 @@ namespace AdminUI.ApiServices
             }
         }
 
-        public async Task<bool> CreateAsync(WarehouseModel model)
+        public async Task<bool> CreateAsync(ExportModel model)
         {
             //await AddJwtHeader();
 
             try
             {
                 // Gửi POST request tới API
-                var response = await _http.PostAsJsonAsync("api/Warehouse", model);
+                var response = await _http.PostAsJsonAsync("api/Export", model);
 
                 // Kiểm tra kết quả
                 if (response.IsSuccessStatusCode)
                 {
                     // Đọc dữ liệu trả về từ API (ID sản phẩm)
-                    // var warehouse = await response.Content.ReadFromJsonAsync<WarehouseResponse>();
+                    // var Export = await response.Content.ReadFromJsonAsync<ExportResponse>();
                     return true;
                 }
                 else
                 {
                     return false;
-                    //throw new Exception("Failed to create Warehouse");
+                    //throw new Exception("Failed to create Export");
                 }
             }
             catch (Exception ex)
@@ -61,13 +61,43 @@ namespace AdminUI.ApiServices
                 throw new Exception("API call failed");
             }
         }
-        public async Task<bool> Update(WarehouseModel model)
+        public async Task<bool> UpdateStatus(int ExportId, int status)
+        {
+            //await AddJwtHeader();
+
+            try
+            {
+                var model = new UpdateStatusRequest(ExportId, status);
+                // Gửi POST request tới API
+                var response = await _http.PostAsJsonAsync("api/Export", model);
+
+                // Kiểm tra kết quả
+                if (response.IsSuccessStatusCode)
+                {
+                    // Đọc dữ liệu trả về từ API (ID sản phẩm)
+                    // var Export = await response.Content.ReadFromJsonAsync<ExportResponse>();
+                    return true;
+                }
+                else
+                {
+                    return false;
+                    //throw new Exception("Failed to create Export");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Xử lý ngoại lệ
+                Console.WriteLine($"Error: {ex.Message}");
+                throw new Exception("API call failed");
+            }
+        }
+        public async Task<bool> Update(ExportModel model)
         {
             //await AddJwtHeader();
             try
             {
                 // Gửi POST request tới API
-                var response = await _http.PutAsJsonAsync("api/Warehouse", model);
+                var response = await _http.PutAsJsonAsync("api/Export", model);
                 var msg = await response.Content.ReadFromJsonAsync<MessageResponse>();
                 Console.WriteLine(msg.Message);
                 // Kiểm tra kết quả
@@ -81,13 +111,13 @@ namespace AdminUI.ApiServices
                 return false;
             }
         }
-        public async Task<bool> Delete(string id)
+        public async Task<bool> Delete(int id)
         {
-            //await AddJwtHeader();
+            await AddJwtHeader();
             try
             {
                 // Gửi yêu cầu DELETE tới API
-                var response = await _http.DeleteAsync($"api/Warehouse/delete/{id}");
+                var response = await _http.DeleteAsync($"api/Export/delete/{id}");
                 var msg = await response.Content.ReadFromJsonAsync<MessageResponse>();
                 Console.WriteLine(msg.Message);
                 // Kiểm tra nếu yêu cầu thành công (status code 200-299)

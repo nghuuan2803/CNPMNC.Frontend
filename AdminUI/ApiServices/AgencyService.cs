@@ -22,7 +22,7 @@ namespace AdminUI.ApiServices
         {
             try
             {
-                await AddJwtHeader();
+                //await AddJwtHeader();
                 var result = await _http.GetFromJsonAsync<AgencyListResponse>("api/Agency/get-all");
                 return result.Data;
             }
@@ -63,7 +63,7 @@ namespace AdminUI.ApiServices
         }
         public async Task<bool> Update(AgencyModel model)
         {
-            await AddJwtHeader();
+            //await AddJwtHeader();
             try
             {
                 // Gửi POST request tới API

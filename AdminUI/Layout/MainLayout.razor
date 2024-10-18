@@ -56,7 +56,7 @@
         <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" OnClick="Logout" />
     </MudAppBar>
     <MudDrawer @bind-Open="@_open" ClipMode="_clipMode" Breakpoint="@_breakpoint" Elevation="1" Variant="@DrawerVariant.Mini" OpenMiniOnHover="true">
-        <MudNavMenu Rounded="true" Bordered="true" Color="Color.Primary">
+        <MudNavMenu Rounded="false" Bordered="true" Color="Color.Primary">
             <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="dashboard" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
             <MudNavLink Style="@($"height: 45px;")" Href="product" Icon="@Icons.Material.Filled.Storage">Hàng hóa</MudNavLink>
 @*             <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="inventory" Icon="@Icons.Material.Filled.Warehouse">Tồn kho</MudNavLink> *@
@@ -65,7 +65,7 @@
             <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="check" Icon="@Icons.Material.Filled.FactCheck">Kiểm kê</MudNavLink>
             <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="warehouse" Icon="@Icons.Material.Filled.Agriculture">Kho</MudNavLink>
             @* <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="dounut-chart" Icon="@Icons.Material.Filled.InsertChart">Thống kê</MudNavLink> *@
-            <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="employee" Icon="@Icons.Material.Filled.Groups">Nhân sự</MudNavLink>
+            <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="employee" Icon="@Icons.Material.Filled.Groups">Nhân viên</MudNavLink>
 @*             <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="setting" Icon="@Icons.Material.Filled.Settings">Cài đặt</MudNavLink> *@
             <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="agency" Icon="@Icons.Material.Filled.Cloud">Đại lý</MudNavLink>
             @*             <MudNavGroup Style="@($"height: 50px;")" IconColor="Color.Info" Title="Nhân sự" Icon="@Icons.Material.Filled.Groups" Expanded="true">

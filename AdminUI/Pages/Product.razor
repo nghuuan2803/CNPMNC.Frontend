@@ -9,83 +9,69 @@
 @using ClosedXML.Excel;
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-@* <div class="row mb20">
-    <div class="col-12 col-md-6 col-lg-3 my-2">
-        <MudPaper Style="@($"background:{Colors.DeepPurple.Default}; color:{Colors.Shades.White}")" Outlined="true" Height="80px" Class="d-flex align-center justify-center cursor-pointer" @onclick="Category">
-            <MudIcon Icon="@Icons.Material.Filled.Category" Class="mr-1" />
-            <MudText Typo="Typo.h6">Danh mục</MudText>
-        </MudPaper>
-    </div>
-    <div class="col-12 col-md-6 col-lg-3 my-2">
-        <MudPaper Style="@($"background:{Colors.LightBlue.Default}; color:{Colors.Shades.White}")" Outlined="true" Height="80px" Class="d-flex align-center justify-center">
-            Thương hiệu
-        </MudPaper>
-    </div>
-    <div class="col-12 col-md-6 col-lg-3 my-2">
-        <MudPaper Style="@($"background:{Colors.Purple.Default}; color:{Colors.Shades.White}")" Outlined="true" Height="80px" Class="d-flex align-center justify-center">
-            Nhà cung cấp
-        </MudPaper>
-    </div>
-    <div class="col-12 col-md-6 col-lg-3 my-2">
-        <MudPaper Style="@($"background:{Colors.Indigo.Default}; color:{Colors.Shades.White}")" Outlined="true" Height="80px" Class="d-flex align-center justify-center">
-            Xuất xứ
-        </MudPaper>
-    </div>
-</div>
-<style>
-    .mb20 {
-        margin-bottom: 20px;
-    }
-    .w-1{
-        width:100px;
-    }
-</style> *@
+<MudTabs Outlined="true" Centered="true">
+    <MudTabPanel Text="Sản phẩm" Icon="@Icons.Material.Filled.Api">
+        <div class="pt-10 px-10">
+            <MudDataGrid T="ProductModel" ReadOnly="false" EditMode="DataGridEditMode.Form" QuickFilter="@_quickFilter"
+                         Bordered="false" Dense="true" Items="Data" Filterable="false" Hover="true" RowClick="OnRowClick"
+                         EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column" SelectedItem="tempItem" CommittedItemChanges="CommittedItemChanges"
+                         Virtualize="true" Loading="loading" Height="400px" FixedHeader="true">
+                <ToolBarContent>
 
-<MudDataGrid T="ProductModel" ReadOnly="false" EditMode="DataGridEditMode.Form" QuickFilter="@_quickFilter"
-             Bordered="true" Dense="true" Items="Data" Filterable="false" Hover="true" RowClick="OnRowClick"
-             EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column" SelectedItem="tempItem" CommittedItemChanges="CommittedItemChanges"
-             Virtualize="true" Loading="loading" Height="400px" FixedHeader="true">
-    <ToolBarContent>
-        <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
-            <MudTooltip Text="Thêm sản phẩm">
-                <MudIconButton Icon="@Icons.Material.Filled.Add" @onclick="OpenDialogAsync"></MudIconButton>
-            </MudTooltip>
-            @*             <MudTooltip Text="Nhập từ file excel">
-            <MudIconButton Icon="@Icons.Material.Filled.FilePresent" @onclick="@(()=>ShowMessage($"Tính năng chưa mở","addmulti"))"></MudIconButton>
-            </MudTooltip> *@
-            <MudTooltip Text="Nhập từ file excel">
-                <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles">
-                    <ActivatorContent>
-                        <MudIconButton Icon="@Icons.Material.Filled.FilePresent"></MudIconButton>
-                    </ActivatorContent>
-                </MudFileUpload>
-            </MudTooltip>
-            <MudTooltip Text="Download excel">
-                <MudIconButton Icon="@Icons.Material.Filled.Download" OnClick="ExportToExcel"></MudIconButton>
-            </MudTooltip>
-        </MudButtonGroup>
-        <MudSpacer />
-        <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.End" Immediate="true"
-                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
 
-    </ToolBarContent>
-    <Columns>
-        <PropertyColumn Class="w-1" Property="x => x.Id" Title="Id" Editable="false" />
-        <PropertyColumn Property="x => x.Name" Title="Tên sản phẩm" />
-        <PropertyColumn Format="#,0 đ" Property="@(x => x.Price)" Title="Giá" />
-        <PropertyColumn Property="x => x.Quantity" Title="Số lượng" />
-        <TemplateColumn Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-center">
-            <CellTemplate>
-                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Color="Color.Warning" OnClick="@context.Actions.StartEditingItemAsync" />
-                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="()=> ShowDeleteConfirmation(context.Item)" />
-                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.MoreVert" Color="Color.Dark" OnClick="()=> ShowDeleteConfirmation(context.Item)" />
-            </CellTemplate>
-        </TemplateColumn>
-    </Columns>
-    <PagerContent>
-        <MudDataGridPager T="ProductModel" />
-    </PagerContent>
-</MudDataGrid>
+                    <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
+                        <MudTooltip Text="Thêm sản phẩm">
+                            <MudIconButton Icon="@Icons.Material.Filled.Add" @onclick="OpenDialogAsync"></MudIconButton>
+                        </MudTooltip>
+                        @*             <MudTooltip Text="Nhập từ file excel">
+                        <MudIconButton Icon="@Icons.Material.Filled.FilePresent" @onclick="@(()=>ShowMessage($"Tính năng chưa mở","addmulti"))"></MudIconButton>
+                        </MudTooltip> *@
+                        <MudTooltip Text="Nhập từ file excel">
+                            <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles">
+                                <ActivatorContent>
+                                    <MudIconButton Icon="@Icons.Material.Filled.FilePresent"></MudIconButton>
+                                </ActivatorContent>
+                            </MudFileUpload>
+                        </MudTooltip>
+                        <MudTooltip Text="Download excel">
+                            <MudIconButton Icon="@Icons.Material.Filled.Download" OnClick="ExportToExcel"></MudIconButton>
+                        </MudTooltip>
+                    </MudButtonGroup>
+                    <MudSpacer />
+
+                    <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.End" Immediate="true"
+                                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="ml-1"></MudTextField>
+                </ToolBarContent>
+                <Columns>
+                    <PropertyColumn Class="w-1" Property="x => x.Id" Title="Id" Editable="false" />
+                    <PropertyColumn Property="x => x.Name" Title="Tên sản phẩm" />
+                    <PropertyColumn Format="#,0 đ" Property="@(x => x.Price)" Title="Giá" />
+                    <PropertyColumn Property="x => x.Quantity" Title="Số lượng" />
+                    <TemplateColumn Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-end">
+                        <CellTemplate>
+                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Color="Color.Warning" OnClick="@context.Actions.StartEditingItemAsync" />
+                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="()=> ShowDeleteConfirmation(context.Item)" />
+                            @* <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.MoreVert" Color="Color.Dark" OnClick="()=> ShowDeleteConfirmation(context.Item)" /> *@
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+                <PagerContent>
+                    <MudDataGridPager T="ProductModel" />
+                </PagerContent>
+            </MudDataGrid>
+        </div>
+    </MudTabPanel>
+    <MudTabPanel Text="Danh mục" Icon="@Icons.Material.Filled.BugReport">
+
+    </MudTabPanel>
+    <MudTabPanel Text="Nhãn hàng" Icon="@Icons.Material.Filled.BugReport" >
+
+    </MudTabPanel>
+    <MudTabPanel Text="Nhà cung cấp" Icon="@Icons.Material.Filled.BugReport" >
+
+    </MudTabPanel>
+</MudTabs>
+
 <script>
     window.downloadFileFromByteArray = (fileName, byteArray) => {
         // Tạo Blob từ byte array
@@ -138,7 +124,7 @@
         }
         catch
         {
-            Snackbar.Add("Gọi API thất bại, vui lòng kiểm tra lại server!",Severity.Error);
+            Snackbar.Add("Gọi API thất bại, vui lòng kiểm tra lại server!", Severity.Error);
             Snackbar.Add("Tạm thời sử dụng dữ liệu giả!", Severity.Warning);
             Data = await ProductService.GetFakeData();
         }

@@ -17,13 +17,12 @@ namespace AdminUI.ApiServices
             _http = httpClient;
             _localStorage = localStorage;
         }
-        public ImportServices() { }
 
         public async Task<List<ImportModel>> GetAllAsync()
         {
             try
             {
-                await AddJwtHeader();
+                //await AddJwtHeader();
                 var result = await _http.GetFromJsonAsync<ImportListResponse>("api/Import/get-all");
                 return result.Data;
             }

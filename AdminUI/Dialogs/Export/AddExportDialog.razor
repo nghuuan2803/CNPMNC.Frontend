@@ -2,7 +2,7 @@
 @using AutoMapper
 @using System.Net.Http.Json
 @inject IMapper Mapper
-@inject ImportServices Service
+@inject ExportServices Service
 @inject ProductService ProductService
 @inject HttpClient Http
 @inject ISnackbar Snackbar
@@ -17,9 +17,9 @@
     <DialogContent>
         <MudTabs @ref="tabs" Elevation="0" Rounded="true" Centered="true" Class="my-0" Color="Color.Inherit" Position="Position.Top">
             <MudTabPanel Icon="@Icons.Material.Filled.Api" Text="Bước 1" BadgeData='"!"' BadgeColor="Color.Error">
-                <MudSelect @bind-Value=suplier T="int" Label="Chọn nhà cung cấp">
-                    <MudSelectItem Value="1">Cty TNHH ABC</MudSelectItem>
-                    <MudSelectItem Value="2">Cty TNHH XYZ</MudSelectItem>
+                <MudSelect @bind-Value=agency T="int" Label="Chọn đại lý">
+                    <MudSelectItem Value="1">Đại lý A</MudSelectItem>
+                    <MudSelectItem Value="2">Đại lý B</MudSelectItem>
                 </MudSelect>
                 <MudSelect @bind-Value=warehouse T="string" Label="Chọn kho">
                     <MudSelectItem Value="@("W001")">Cty TNHH ABC</MudSelectItem>
@@ -32,7 +32,7 @@
             </MudTabPanel>
             <MudTabPanel Icon="@Icons.Material.Filled.Build" Disabled="_step2" Text="Bước 2" BadgeData="1" BadgeColor="Color.Success" OnClick="LoadProductData">
                 <div class="pt-10 px-10">
-                    <MudDataGrid T="SelectImportItem" ReadOnly="false" EditMode="DataGridEditMode.Form" QuickFilter="@_quickFilterProduct"
+                    <MudDataGrid T="SelectExportItem" ReadOnly="false" EditMode="DataGridEditMode.Form" QuickFilter="@_quickFilterProduct"
                                  Bordered="true" Dense="true" Items="ItemList" Filterable="false" Hover="true" CommittedItemChanges="SeclectItemCommit"
                                  EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column"
                                  Virtualize="true" Height="400px" FixedHeader="true">
@@ -41,10 +41,10 @@
                                           AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
                         </ToolBarContent>
                         <Columns>
-                            <PropertyColumn Style="width:200px" Property="x => x.Id" Title="Id" Editable="false" />
+                            <PropertyColumn Style="width:200px" Property="x => x.ProductId" Title="Id" Editable="false" />
                             <PropertyColumn Property="x => x.Name" Title="Sản phẩm" Editable="false" />
-                            <PropertyColumn Property="x => x.ImportQty" Title="Số lượng nhập" />
-                            <PropertyColumn Property="x => x.ImportPrice" Title="Giá nhập" />
+                            <PropertyColumn Property="x => x.ExportQty" Title="Số lượng nhập" />
+                            <PropertyColumn Property="x => x.ExportPrice" Title="Giá nhập" />
                             <TemplateColumn Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-end">
                                 <CellTemplate>
                                     <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Add" Color="Color.Warning" OnClick="context.Actions.StartEditingItemAsync" />
@@ -52,7 +52,7 @@
                             </TemplateColumn>
                         </Columns>
                         <PagerContent>
-                            <MudDataGridPager T="SelectImportItem" />
+                            <MudDataGridPager T="SelectExportItem" />
                         </PagerContent>
                     </MudDataGrid>
                     <MudButton Color="Color.Tertiary" OnClick="OnStep2Next">Next</MudButton>
@@ -61,15 +61,15 @@
             <MudTabPanel Icon="@Icons.Material.Filled.Build" Text="Bước 3" Disabled="_step3" BadgeData="1" BadgeColor="Color.Success">
                 <div class="pt-10 px-10">
                     <MudButton OnClick="Submit">Xác nhận</MudButton>
-                    <MudDataGrid T="SelectImportItem" ReadOnly="false" EditMode="DataGridEditMode.Form"
+                    <MudDataGrid T="SelectExportItem" ReadOnly="false" EditMode="DataGridEditMode.Form"
                                  Bordered="true" Dense="true" Items="SelectedItem" Filterable="false" Hover="true" CommittedItemChanges="SeclectItemCommit"
                                  EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column"
                                  Virtualize="true" Height="400px" FixedHeader="true">
                         <Columns>
                             <PropertyColumn Style="width:200px" Property="x => x.Id" Title="Id" Editable="false" />
                             <PropertyColumn Property="x => x.Name" Title="Sản phẩm" Editable="false" />
-                            <PropertyColumn Property="x => x.ImportQty" Title="Số lượng nhập" />
-                            <PropertyColumn Property="x => x.ImportPrice" Title="Giá nhập" />
+                            <PropertyColumn Property="x => x.ExportQty" Title="Số lượng nhập" />
+                            <PropertyColumn Property="x => x.ExportPrice" Title="Giá nhập" />
                             <TemplateColumn Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-end">
                                 <CellTemplate>
                                     <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Remove" Color="Color.Warning" OnClick="context.Actions.StartEditingItemAsync" />
@@ -77,7 +77,7 @@
                             </TemplateColumn>
                         </Columns>
                         <PagerContent>
-                            <MudDataGridPager T="SelectImportItem" />
+                            <MudDataGridPager T="SelectExportItem" />
                         </PagerContent>
                     </MudDataGrid>
                     <MudButton Color="Color.Tertiary" OnClick="Submit">Next</MudButton>
@@ -96,13 +96,13 @@
     private MudDialogInstance MudDialog { get; set; }
 
     private MudForm form;
-    public ImportModel Data { get; set; } = new();
+    public ExportModel Data { get; set; } = new();
 
     string _searchString = null!;
 
     public List<ProductModel> ProductData { get; set; }
-    public List<SelectImportItem> ItemList { get; set; }
-    public List<SelectImportItem> SelectedItem { get; set; } = new();
+    public List<SelectExportItem> ItemList { get; set; }
+    public List<SelectExportItem> SelectedItem { get; set; } = new();
 
     MudTabs tabs;
 
@@ -111,8 +111,8 @@
     bool _step2 = true;
     bool _step3 = true;
 
-    int suplier = 1;
     string warehouse = "W001";
+    int agency = 1;
 
     private async Task SubmitForm()
     {
@@ -136,7 +136,7 @@
     int spacing = 0;
 
     #region ProductData
-    private Func<SelectImportItem, bool> _quickFilterProduct => x =>
+    private Func<SelectExportItem, bool> _quickFilterProduct => x =>
     {
         if (string.IsNullOrWhiteSpace(_searchString))
             return true;
@@ -150,7 +150,7 @@
         return false;
     };
 
-    private async Task OpenAddItemDialog(SelectImportItem item)
+    private async Task OpenAddItemDialog(SelectExportItem item)
     {
 
     }
@@ -160,25 +160,25 @@
         tabs.ActivatePanel(index);
     }
 
-    private void SeclectItemCommit(SelectImportItem item)
+    private void SeclectItemCommit(SelectExportItem item)
     {
-        if (!SelectedItem.Contains(item) && item.ImportQty != 0 && item.ImportPrice != 0)
+        if (!SelectedItem.Contains(item) && item.ExportQty != 0 && item.ExportPrice != 0)
         {
             SelectedItem.Add(item);
             _selectedCount++;
         }
-        else if (SelectedItem.Contains(item) && (item.ImportPrice == 0 || item.ImportQty == 0))
+        else if (SelectedItem.Contains(item) && (item.ExportPrice == 0 || item.ExportQty == 0))
         {
             SelectedItem.Remove(item);
-            item.ImportQty = 0;
-            item.ImportPrice = 0;
+            item.ExportQty = 0;
+            item.ExportPrice = 0;
             _selectedCount--;
             Snackbar.Add("Số lượng và giá phải khác 0", Severity.Error);
         }
         else
         {
-            item.ImportQty = 0;
-            item.ImportPrice = 0;
+            item.ExportQty = 0;
+            item.ExportPrice = 0;
             Snackbar.Add("Số lượng và giá phải khác 0", Severity.Error);
         }
     }
@@ -188,19 +188,17 @@
         if (!_loadProduct)
         {
             ProductData = await ProductService.GetAllAsync();
-            ItemList = Mapper.Map<List<SelectImportItem>>(ProductData);
+            ItemList = Mapper.Map<List<SelectExportItem>>(ProductData);
             _loadProduct = true;
         }
     }
 
     private async Task Submit()
     {
-        var items = Mapper.Map<List<ImportItem>>(SelectedItem);
-        var data = new ImportModel
+        var items = Mapper.Map<List<ExportItem>>(SelectedItem);
+        var data = new ExportModel
             {
-                SuplierId = suplier,
-                OrderBy = "EMP001",
-                WarehouseId = warehouse,
+                AgencyId = agency,
                 CreatedOn = DateTime.Now,
                 Amount = items.Sum(a => a.Quantity * a.UnitPrice),
                 Items = items

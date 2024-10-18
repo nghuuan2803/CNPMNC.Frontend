@@ -95,7 +95,7 @@ namespace AdminUI.Services
         {
             try
             {
-                await AddJwtHeader();
+                //await AddJwtHeader();
                 // Gửi POST request tới API
                 var response = await _http.PostAsJsonAsync("api/Product/create-multiple", model);
 
@@ -141,7 +141,7 @@ namespace AdminUI.Services
         }
         public async Task<bool> Delete(int id)
         {
-            await AddJwtHeader();
+            //await AddJwtHeader();
             try
             {
                 // Gửi yêu cầu DELETE tới API

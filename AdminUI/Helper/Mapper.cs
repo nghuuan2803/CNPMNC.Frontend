@@ -23,6 +23,14 @@ namespace AdminUI.Helper
             CreateMap<SelectImportItem, ImportItem>()
                 .ForMember(dest => dest.UnitPrice, opt => opt.MapFrom(src => src.ImportPrice))
                 .ForMember(dest => dest.Quantity, opt => opt.MapFrom(src => src.ImportQty));
+
+            CreateMap<ProductModel, SelectExportItem>()
+                .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
+
+            CreateMap<SelectExportItem, ExportItem>()
+                .ForMember(dest => dest.UnitPrice, opt => opt.MapFrom(src => src.ExportPrice))
+                .ForMember(dest => dest.Quantity, opt => opt.MapFrom(src => src.ExportQty));
         }
     }
 }
