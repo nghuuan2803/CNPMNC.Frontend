@@ -20,13 +20,15 @@
                 <MudSelect @bind-Value=agency T="int" Label="Chọn đại lý">
                     <MudSelectItem Value="1">Đại lý A</MudSelectItem>
                     <MudSelectItem Value="2">Đại lý B</MudSelectItem>
+                    <MudSelectItem Value="3">Đại lý C</MudSelectItem>
+                    <MudSelectItem Value="4">Đại lý D</MudSelectItem>
                 </MudSelect>
                 <MudSelect @bind-Value=warehouse T="string" Label="Chọn kho">
-                    <MudSelectItem Value="@("W001")">Cty TNHH ABC</MudSelectItem>
-                    <MudSelectItem Value="@("W002")">Cty TNHH ABC</MudSelectItem>
-                    <MudSelectItem Value="@("W003")">Cty TNHH ABC</MudSelectItem>
-                    <MudSelectItem Value="@("W004")">Cty TNHH ABC</MudSelectItem>
-                    <MudSelectItem Value="@("W005")">Cty TNHH ABC</MudSelectItem>
+                    <MudSelectItem Value="@("W001")">Kho Media Củ Chi</MudSelectItem>
+                    <MudSelectItem Value="@("W002")">Kho điện lạnh Tân Phú </MudSelectItem>
+                    <MudSelectItem Value="@("W003")">Kho điện gia dụng Tân bình</MudSelectItem>
+                    <MudSelectItem Value="@("W004")">Kho phân loại Gò Vấp</MudSelectItem>
+                    <MudSelectItem Value="@("W005")">Kho hàng cũ</MudSelectItem>
                 </MudSelect>
                 <MudButton Color="Color.Tertiary" OnClick="OnStep1Next">Next</MudButton>
             </MudTabPanel>
@@ -43,8 +45,8 @@
                         <Columns>
                             <PropertyColumn Style="width:200px" Property="x => x.ProductId" Title="Id" Editable="false" />
                             <PropertyColumn Property="x => x.Name" Title="Sản phẩm" Editable="false" />
-                            <PropertyColumn Property="x => x.ExportQty" Title="Số lượng nhập" />
-                            <PropertyColumn Property="x => x.ExportPrice" Title="Giá nhập" />
+                            <PropertyColumn Property="x => x.ExportQty" Title="Số lượng xuất" />
+                            <PropertyColumn Property="x => x.ExportPrice" Title="Giá xuất" />
                             <TemplateColumn Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-end">
                                 <CellTemplate>
                                     <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Add" Color="Color.Warning" OnClick="context.Actions.StartEditingItemAsync" />
