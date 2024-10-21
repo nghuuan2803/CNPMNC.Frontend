@@ -1,4 +1,6 @@
-﻿namespace AdminUI.Objects
+﻿using Microsoft.AspNetCore.Components.Forms;
+
+namespace AdminUI.Objects
 {
     public class ProductModel
     {
@@ -67,5 +69,11 @@
             }
             return list;
         }
+    }
+
+    public class CreateProduct
+    {
+        public ProductModel Data { get; set; }
+        public IBrowserFile ImageFile { get; set; }
     }
 }

@@ -1,6 +1,15 @@
 ﻿<MudDialog>
     <DialogContent>
         <MudForm @ref="form" Spacing="spacing" style="width:400px">
+            <MudFileUpload T="IBrowserFile" @bind-Files="imgFile">
+                <ActivatorContent>
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.CloudUpload">
+                        Chọn ảnh
+                    </MudButton>
+                </ActivatorContent>
+            </MudFileUpload>
             <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Name" @bind-Value="name" Required="true" RequiredError="Name is required"  />
             <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Description" @bind-Value="description" />
             <MudTextField InputType="InputType.Number" Variant="Variant.Outlined" Margin="Margin.Dense" T="double" Label="Price" @bind-Value="price" HelperText="Enter a valid price" Required="true" RequiredError="Price is required" />
@@ -25,6 +34,9 @@
 
     private MudForm form;
 
+    IList<IBrowserFile> _files = new List<IBrowserFile>();
+    IBrowserFile imgFile;
+
     private string name;
     private string description;
     private double price = 500000;
@@ -37,7 +49,11 @@
         if (form.IsValid)
         {
             // Form is valid, close the dialog and pass the data
-            var formData = new ProductModel(0, name, quantity, price);
+            var formData = new CreateProduct
+                {
+                    Data = new ProductModel(0, name, quantity, price),
+                    ImageFile = imgFile
+                };
             MudDialog.Close(DialogResult.Ok(formData));
         }
     }

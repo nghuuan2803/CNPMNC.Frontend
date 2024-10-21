@@ -1,0 +1,84 @@
+﻿@page "/upload"
+@inject HttpClient Http
+
+<h3>Create Product</h3>
+
+<EditForm Model="newProduct" OnValidSubmit="HandleValidSubmit">
+    <div>
+        <label for="name">Product Name:</label>
+        <InputText id="name" @bind-Value="newProduct.Name" />
+    </div>
+    <div>
+        <label for="description">Description:</label>
+        <InputTextArea id="description" @bind-Value="newProduct.Description" />
+    </div>
+    <div>
+        <label for="price">Price:</label>
+        <InputNumber id="price" @bind-Value="newProduct.Price" />
+    </div>
+
+    <div>
+        <label for="file">Product Image:</label>
+        <InputFile OnChange="HandleFileSelected" />
+    </div>
+
+    @if (selectedFile is not null)
+    {
+        <img src="@previewImage" alt="Selected image" width="300" />
+    }
+
+    <button type="submit">Create Product</button>
+</EditForm>
+
+@code {
+    private ProductModel newProduct = new();
+    private IBrowserFile selectedFile;
+    private string previewImage;
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+
+        // Generate preview image URL for user feedback
+        var buffer = new byte[selectedFile.Size];
+        await selectedFile.OpenReadStream().ReadAsync(buffer);
+        previewImage = $"data:image/png;base64,{Convert.ToBase64String(buffer)}";
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        var content = new MultipartFormDataContent();
+
+        // Add form data (product info)
+        content.Add(new StringContent(newProduct.Name), "name");
+        content.Add(new StringContent(newProduct.Description), "description");
+        content.Add(new StringContent(newProduct.Price.ToString()), "price");
+
+        // Add image file to form data
+        if (selectedFile is not null)
+        {
+            var stream = selectedFile.OpenReadStream();
+            var fileContent = new StreamContent(stream);
+            content.Add(fileContent, "file", selectedFile.Name);
+        }
+
+        // Send data to API
+        var response = await Http.PostAsync("https://your-api-server.com/api/products", content);
+
+        if (response.IsSuccessStatusCode)
+        {
+            // Handle success (e.g., redirect to product list)
+        }
+        else
+        {
+            // Handle failure (e.g., display error)
+        }
+    }
+
+    public class ProductModel
+    {
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public decimal Price { get; set; }
+    }
+}

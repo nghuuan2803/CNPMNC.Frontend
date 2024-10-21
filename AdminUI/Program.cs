@@ -1,5 +1,4 @@
 using AdminUI.ApiServices;
-using AdminUI.Helper;
 using AdminUI.Services;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -7,6 +6,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor;
 using MudBlazor.Services;
+using Tewr.Blazor.FileReader;
 
 namespace AdminUI
 {
@@ -47,6 +47,7 @@ namespace AdminUI
             builder.Services.AddBlazoredLocalStorage();
             builder.Services.AddScoped<AuthenticationService>();
             builder.Services.AddOptions();
+            builder.Services.AddFileReaderService(options => options.UseWasmSharedBuffer = true);
 
             await builder.Build().RunAsync();
         }

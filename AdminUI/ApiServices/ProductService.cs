@@ -3,6 +3,7 @@ using AdminUI.Objects.Response;
 using System.Net.Http.Json;
 using Blazored.LocalStorage;
 using System.Net.Http.Headers;
+
 namespace AdminUI.Services
 {
     public class ProductService
@@ -15,7 +16,6 @@ namespace AdminUI.Services
             _http = httpClient;
             _localStorage = localStorage;
         }
-        public ProductService() { }
 
 
         public static List<ProductModel> FakeData { get; set; }
@@ -63,26 +63,57 @@ namespace AdminUI.Services
                 throw;
             }
         }
-        public async Task<int> CreateAsync(ProductModel model)
+        //public async Task<int> CreateAsync(CreateProduct model)
+        //{
+        //    try
+        //    {
+        //        //await AddJwtHeader();
+        //        // Gửi POST request tới API
+        //        var response = await _http.PostAsJsonAsync("api/Product/create", model);
+
+        //        // Kiểm tra kết quả
+        //        if (response.IsSuccessStatusCode)
+        //        {
+        //            // Đọc dữ liệu trả về từ API (ID sản phẩm)
+        //            var product = await response.Content.ReadFromJsonAsync<ProductResponse>();
+        //            return product.Data.Id;
+        //        }
+        //        else
+        //        {
+        //            return -1;
+        //            //throw new Exception("Failed to create product");
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // Xử lý ngoại lệ
+        //        Console.WriteLine($"Error: {ex.Message}");
+        //        throw new Exception("API call failed");
+        //    }
+        //}
+        public async Task<int> CreateAsync(CreateProduct model)
         {
             try
             {
-                await AddJwtHeader();
-                // Gửi POST request tới API
-                var response = await _http.PostAsJsonAsync("api/Product/create", model);
+                //await AddJwtHeader();
+                var productJson = System.Text.Json.JsonSerializer.Serialize(model.Data);
 
+                var content = new MultipartFormDataContent();
+                var stream = model.ImageFile.OpenReadStream();
+                var fileContent = new StreamContent(stream);
+                content.Add(fileContent, "file", model.ImageFile.Name);
+
+                // Gửi yêu cầu tới API
+                var response = await _http.PostAsync("/api/Product/upload-image", content);
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception("Error while calling API.");
+                }
                 // Kiểm tra kết quả
-                if (response.IsSuccessStatusCode)
-                {
-                    // Đọc dữ liệu trả về từ API (ID sản phẩm)
-                    var product = await response.Content.ReadFromJsonAsync<ProductResponse>();
-                    return product.Data.Id;
-                }
-                else
-                {
-                    return -1;
-                    //throw new Exception("Failed to create product");
-                }
+                // Đọc dữ liệu trả về từ API (ID sản phẩm)
+                var product = await response.Content.ReadFromJsonAsync<ProductResponse>();
+                return product.Data.Id;
+
             }
             catch (Exception ex)
             {
@@ -91,6 +122,7 @@ namespace AdminUI.Services
                 throw new Exception("API call failed");
             }
         }
+
         public async Task<List<ProductModel>> CreateMultipleAsync(List<ProductModel> model)
         {
             try
@@ -185,5 +217,9 @@ namespace AdminUI.Services
             //
         }
         #endregion
+        public class CreateProductResult
+        {
+            public string ImageLink { get; set; }
+        }
     }
 }
