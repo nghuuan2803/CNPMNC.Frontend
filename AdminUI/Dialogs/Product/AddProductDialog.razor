@@ -12,16 +12,11 @@
                     </MudButton>
                 </ActivatorContent>
             </MudFileUpload>
-            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Name" @bind-Value="name" Required="true" RequiredError="Name is required"  />
-            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Description" @bind-Value="description" />
-            <MudTextField InputType="InputType.Number" Variant="Variant.Outlined" Margin="Margin.Dense" T="double" Label="Price" @bind-Value="price" HelperText="Enter a valid price" Required="true" RequiredError="Price is required" />
-            <MudTextField InputType="InputType.Number" Variant="Variant.Outlined" Margin="Margin.Dense" T="int" Label="Quantity" @bind-Value="quantity" HelperText="Enter quantity" Required="true" RequiredError="Quantity is required" />
-@*             <div class="d-flex">
-                <MudRadioGroup T="string" @bind-Value="category">
-                    <MudRadio  Value=@("Personal")>Personal</MudRadio>
-                    <MudRadio Value=@("Professional")>Professional</MudRadio>
-                </MudRadioGroup>
-            </div> *@
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Mã sản phẩm" @bind-Value="id" Required="true" RequiredError="Chưa nhập mã sản phẩm"  />
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Tên sản phẩm" @bind-Value="name" Required="true" RequiredError="Chưa nhập tên sản phẩm" />
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Mô tả sản phẩm" @bind-Value="description" />
+            <MudTextField InputType="InputType.Number" Variant="Variant.Outlined" Margin="Margin.Dense" T="double" Label="Đơn giá" @bind-Value="price" HelperText="Enter a valid price" Required="true" RequiredError="Chưa nhập đơn giá" />
+            <MudTextField InputType="InputType.Number" Variant="Variant.Outlined" Margin="Margin.Dense" T="double" Label="Giá nhập" @bind-Value="price" HelperText="Enter a valid price" Required="true" RequiredError="Chưa có giá nhập" />
         </MudForm>
     </DialogContent>
     <DialogActions>
@@ -39,10 +34,11 @@
     IList<IBrowserFile> _files = new List<IBrowserFile>();
     IBrowserFile imgFile;
 
+    private string id;
     private string name;
     private string description;
-    private double price = 500000;
-    private int quantity=100;
+    private double price = 5000000;
+    private double importPrice = 3500000;
     //private string category = "Personal"; // Default value
 
     private async Task SubmitForm()
@@ -53,7 +49,7 @@
             // Form is valid, close the dialog and pass the data
             var formData = new CreateProduct
                 {
-                    Data = new ProductModel(0, name, quantity, price),
+                    Data = new ProductModel(id, name, price, importPrice),
                     ImageFile = imgFile
                 };
             var productJson = System.Text.Json.JsonSerializer.Serialize(formData.Data);

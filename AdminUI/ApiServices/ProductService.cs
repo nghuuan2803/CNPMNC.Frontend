@@ -171,7 +171,7 @@ namespace AdminUI.Services
                 return false;
             }
         }
-        public async Task<bool> Delete(int id)
+        public async Task<bool> Delete(string id)
         {
             //await AddJwtHeader();
             try

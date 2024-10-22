@@ -43,10 +43,10 @@
                                   AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="ml-1"></MudTextField>
                 </ToolBarContent>
                 <Columns>
-                    <PropertyColumn Class="w-1" Property="x => x.Id" Title="Id" Editable="false" />
+                    <PropertyColumn Class="w-1" Property="x => x.Id" Title="Mã sản phẩm" Editable="false" />
                     <PropertyColumn Property="x => x.Name" Title="Tên sản phẩm" />
-                    <PropertyColumn Format="#,0 đ" Property="@(x => x.Price)" Title="Giá" />
-                    <PropertyColumn Property="x => x.Quantity" Title="Số lượng" />
+                    <PropertyColumn Format="#,0 đ" Property="@(x => x.Price)" Title="Đơn giá" />
+                    <PropertyColumn Property="x => x.Quantity" Title="Tồn kho" Editable="false" />
                     <TemplateColumn Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-end">
                         <CellTemplate>
                             <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Color="Color.Warning" OnClick="@context.Actions.StartEditingItemAsync" />
@@ -192,16 +192,15 @@
             // Đọc từng hàng dữ liệu trong file Excel
             for (int row = 2; row <= rowCount; row++) // Giả sử hàng đầu tiên là tiêu đề
             {
-                string name = worksheet.Cell(row, 1).GetString();
-                double price = worksheet.Cell(row, 2).GetDouble();
                 var item = new ProductModel
                     {
-                        Name = worksheet.Cell(row, 1).GetString(),
-                        Price = worksheet.Cell(row, 2).GetDouble(),
-                        Quantity = (int)worksheet.Cell(row, 3).GetDouble(),
-                        Description = worksheet.Cell(row, 4).GetString(),
-                        CategoryId = (int)worksheet.Cell(row, 5).GetDouble(),
-                        BrandId = (int)worksheet.Cell(row, 6).GetDouble(),
+                        Id = worksheet.Cell(row, 1).GetString(),
+                        Name = worksheet.Cell(row, 2).GetString(),
+                        Price = worksheet.Cell(row, 3).GetDouble(),
+                        ImportPrice = worksheet.Cell(row, 4).GetDouble(),
+                        Description = worksheet.Cell(row, 5).GetString(),
+                        CategoryId = (int)worksheet.Cell(row, 6).GetDouble(),
+                        BrandId = (int)worksheet.Cell(row, 7).GetDouble(),
                     };
                 ExcelData.Add(item);
             }
@@ -318,7 +317,7 @@
         {
             // Thêm sản phẩm mới vào danh sách
             await Task.Delay(500);
-            if (newProduct.Id > 0)
+            if (!string.IsNullOrEmpty(newProduct.Id))
             {
                 Data.Insert(0, newProduct);
                 Snackbar.Add("Đã thêm sản phẩm thành công!", Severity.Success);

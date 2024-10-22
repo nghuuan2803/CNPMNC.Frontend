@@ -56,18 +56,18 @@
         <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" OnClick="Logout" />
     </MudAppBar>
     <MudDrawer @bind-Open="@_open" ClipMode="_clipMode" Breakpoint="@_breakpoint" Elevation="1" Variant="@DrawerVariant.Mini" OpenMiniOnHover="true">
-        <MudNavMenu Rounded="false" Bordered="true" Color="Color.Primary">
-            <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="dashboard" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
-            <MudNavLink Style="@($"height: 45px;")" Href="product" Icon="@Icons.Material.Filled.Storage">Hàng hóa</MudNavLink>
+        <MudNavMenu  Rounded="false" Bordered="true" Color="Color.Primary">
+            <MudNavLink Style="height:50px" IconColor="_iconColor" Href="dashboard" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
 @*             <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="inventory" Icon="@Icons.Material.Filled.Warehouse">Tồn kho</MudNavLink> *@
-            <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="import" Icon="@Icons.Material.Filled.AddBusiness">Nhập kho</MudNavLink>
-            <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="export" Icon="@Icons.Material.Filled.ContentPasteGo">Xuất kho</MudNavLink>
-            <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="check" Icon="@Icons.Material.Filled.FactCheck">Kiểm kê</MudNavLink>
-            <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="warehouse" Icon="@Icons.Material.Filled.Agriculture">Kho</MudNavLink>
+            <MudNavLink Style=@(_height) IconColor="_iconColor" Href="import" Icon="@Icons.Material.Filled.AddBusiness">Nhập kho</MudNavLink>
+            <MudNavLink Style=@(_height) IconColor="_iconColor" Href="export" Icon="@Icons.Material.Filled.ContentPasteGo">Xuất kho</MudNavLink>
+            <MudNavLink Style=@(_height) IconColor="_iconColor" Href="check" Icon="@Icons.Material.Filled.FactCheck">Kiểm kho</MudNavLink>
+            <MudNavLink Style=@(_height) IconColor="_iconColor" Href="warehouse" Icon="@Icons.Material.Filled.Warehouse">Tồn Kho</MudNavLink>
             @* <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="dounut-chart" Icon="@Icons.Material.Filled.InsertChart">Thống kê</MudNavLink> *@
-            <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="employee" Icon="@Icons.Material.Filled.Groups">Nhân viên</MudNavLink>
+            <MudNavLink Style=@(_height) IconColor="_iconColor" Href="employee" Icon="@Icons.Material.Filled.Groups">Nhân viên</MudNavLink>
 @*             <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="setting" Icon="@Icons.Material.Filled.Settings">Cài đặt</MudNavLink> *@
-            <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="agency" Icon="@Icons.Material.Filled.Cloud">Đại lý</MudNavLink>
+            <MudNavLink Style=@(_height) IconColor="_iconColor" Href="agency" Icon="@Icons.Material.Filled.Groups2">Đại lý</MudNavLink>
+            <MudNavLink Style=@(_height) IconColor="_iconColor" Href="product" Icon="@Icons.Material.Filled.Storage">Admin</MudNavLink>
             @*             <MudNavGroup Style="@($"height: 50px;")" IconColor="Color.Info" Title="Nhân sự" Icon="@Icons.Material.Filled.Groups" Expanded="true">
             <MudNavLink Style="@($"height: 50px;")" IconColor="_iconColor" Href="staff" Icon="@Icons.Material.Filled.Group">Nhân viên</MudNavLink>
             <MudNavLink Style="@($"height: 50px;")" IconColor="_iconColor" Href="dounut-chart" Icon="@Icons.Material.Filled.Work">Đối tác</MudNavLink>
@@ -86,6 +86,7 @@
 </MudLayout>
 @* </AuthorizeView> *@
 @code {
+    string? _height = "height: 50px;";
     Color _iconColor = Color.Primary;
     private bool _open = true;
     private bool _dense = false;

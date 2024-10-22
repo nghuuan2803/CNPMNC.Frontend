@@ -4,11 +4,13 @@ namespace AdminUI.Objects
 {
     public class ProductModel
     {
-        public int Id { get; set; }
+        public string Id { get; set; }
 
         public string Name { get; set; }
 
         public double Price { get; set; }
+
+        public double ImportPrice { get; set; }
 
         public int Quantity { get; set; }
 
@@ -22,25 +24,26 @@ namespace AdminUI.Objects
 
         public bool Discontinued { get; set; }
 
-        public ProductModel(int id, string name, int quantity, double price)
+        public ProductModel(string id, string name, double price, double importPrice, string? description = null)
         {
             Id = id;
             Name = name;
-            //Description = description;
-            Quantity = quantity;
+            Description = description;
+            Quantity = 0;
             Price = price;
+            ImportPrice = importPrice;
         }
 
         public ProductModel()
         {
         }
 
-        public ProductModel(int id, string name, double price, int quantity, string? photo, string? description, int categoryId, int brandId, bool discontinued)
+        public ProductModel(string id, string name, double price, string? photo, string? description, int categoryId, int brandId, bool discontinued)
         {
             Id = id;
             Name = name;
             Price = price;
-            Quantity = quantity;
+            Quantity = 0;
             Photo = photo;
             Description = description;
             CategoryId = categoryId;
@@ -64,8 +67,7 @@ namespace AdminUI.Objects
             var list = new List<ProductModel>();
             for (int i = 1; i <= 2000; i++)
             {
-                list.Add(new ProductModel(i, "product " + i, 100 + (i * 10), 1000000 + (i * 500000)));
-                //list.Add(new ProductModel(i,"product "+((char)(i+64)).ToString(),Lorem.Paragraph(),100+(i*10),1000000+(i*500000)));
+                list.Add(new ProductModel(id:"SP" + i, name:"Sản phẩm " + i, price: 1000000 + (i * 500000), importPrice: 1000000 + (i * 500000)));
             }
             return list;
         }
