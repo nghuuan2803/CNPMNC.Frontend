@@ -1,4 +1,6 @@
-﻿<MudDialog>
+﻿@inject ProductService service
+@inject HttpClient http
+<MudDialog>
     <DialogContent>
         <MudForm @ref="form" Spacing="spacing" style="width:400px">
             <MudFileUpload T="IBrowserFile" @bind-Files="imgFile">
@@ -54,7 +56,23 @@
                     Data = new ProductModel(0, name, quantity, price),
                     ImageFile = imgFile
                 };
-            MudDialog.Close(DialogResult.Ok(formData));
+            var productJson = System.Text.Json.JsonSerializer.Serialize(formData.Data);
+            var content = new MultipartFormDataContent();
+            var stream = formData.ImageFile.OpenReadStream(maxAllowedSize:10*1024*1024);
+            var fileContent = new StreamContent(stream);
+            content.Add(fileContent, "ImageFile", formData.ImageFile.Name);
+            content.Add(new StringContent(productJson), "DataJson");
+
+            // Gửi yêu cầu tới API
+            var response = await http.PostAsync("/api/Product/create", content);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception("Error while calling API.");
+            }
+            // Kiểm tra kết quả
+            // Đọc dữ liệu trả về từ API (ID sản phẩm)
+            var product = await response.Content.ReadFromJsonAsync<ProductResponse>();
+            MudDialog.Close(DialogResult.Ok(product));
         }
     }
 

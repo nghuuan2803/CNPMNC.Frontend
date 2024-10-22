@@ -314,14 +314,13 @@
         var dialog = await DialogService.ShowAsync<AddProductDialog>("Thêm sản phẩm", options);
         var result = await dialog.Result;
 
-        if (!result.Canceled && result.Data is CreateProduct newProduct)
+        if (!result.Canceled && result.Data is ProductModel newProduct)
         {
             // Thêm sản phẩm mới vào danh sách
             await Task.Delay(500);
-            newProduct.Data.Id = await Service.CreateAsync(newProduct);
-            if (newProduct.Data.Id != -1)
+            if (newProduct.Id > 0)
             {
-                Data.Insert(0, newProduct.Data);
+                Data.Insert(0, newProduct);
                 Snackbar.Add("Đã thêm sản phẩm thành công!", Severity.Success);
                 StateHasChanged();
             }

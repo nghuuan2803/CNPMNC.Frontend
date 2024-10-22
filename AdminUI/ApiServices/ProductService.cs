@@ -91,7 +91,7 @@ namespace AdminUI.Services
         //        throw new Exception("API call failed");
         //    }
         //}
-        public async Task<int> CreateAsync(CreateProduct model)
+        public async Task<ProductModel> CreateAsync(CreateProduct model)
         {
             try
             {
@@ -112,7 +112,7 @@ namespace AdminUI.Services
                 // Kiểm tra kết quả
                 // Đọc dữ liệu trả về từ API (ID sản phẩm)
                 var product = await response.Content.ReadFromJsonAsync<ProductResponse>();
-                return product.Data.Id;
+                return product.Data;
 
             }
             catch (Exception ex)

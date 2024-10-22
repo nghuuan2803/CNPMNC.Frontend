@@ -2,7 +2,7 @@
 <MudDialog>
     <DialogContent>
         <div class="bg-light">
-            <img src="https://i.imgur.com/mk1pTkb.png" width="200" height="200" />
+            <img src="@product.Photo" width="200" alt="Chưa cập nhật hình ảnh" height="200" />
             <MudText Typo="Typo.h5" GutterBottom="true">Thông tin chi tiết sản phẩm @product.Name</MudText>
             <MudForm Spacing="spacing" style="width:400px">
                 <MudTextField ReadOnly Variant="Variant.Outlined" Margin="Margin.Dense" T="int" Label="Id" @bind-Value="product.Id" Required="true" RequiredError="Name is required" />
