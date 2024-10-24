@@ -1,0 +1,27 @@
+﻿<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.h5" GutterBottom="true">Thông tin chi tiết nhà cung cấp: @suplier.Name</MudText>
+        <MudForm Spacing="spacing" style="width:400px">
+            <MudTextField ReadOnly Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Tên nhà cung cấp" @bind-Value="suplier.Name" Required="true" RequiredError="Name is required" />
+            <MudTextField ReadOnly Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Địa chỉ" @bind-Value="suplier.Address" Required="true" RequiredError="Address is required" />
+            <MudTextField ReadOnly Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Email" @bind-Value="suplier.Email" Required="true" RequiredError="Email is required" />
+            <MudTextField ReadOnly Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Số điện thoại" @bind-Value="suplier.PhoneNumber" Required="true" RequiredError="Phone Number is required" />
+            <MudTextField ReadOnly Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Người liên hệ" @bind-Value="suplier.ContactPerson" Required="true" RequiredError="Contact Person is required" />
+            <MudCheckBox ReadOnly T="bool" Label="Ngưng cung cấp" @bind-Checked="suplier.Discontinued" />
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Close">Đóng</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public SuplierModel suplier { get; set; } // Đối tượng nhà cung cấp được truyền vào
+
+    private void Close() => MudDialog.Close(DialogResult.Ok(true));
+    int spacing = 0;
+}

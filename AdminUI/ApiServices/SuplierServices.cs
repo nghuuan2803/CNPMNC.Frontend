@@ -1,15 +1,78 @@
 ﻿using AdminUI.Objects;
+using AdminUI.Objects.Response;
 using Blazored.LocalStorage;
 using System.Net.Http.Json;
 
 namespace AdminUI.ApiServices
 {
-    public class SuplierServices(HttpClient _http, ILocalStorageService _localStorage)
+    public class SuplierService
     {
-        public async Task<List<SuplierModel>> GetAllAsync()
+        private readonly HttpClient _httpClient;
+        private readonly ILocalStorageService _localStorage;
+        public SuplierService(HttpClient httpClient, ILocalStorageService localStorage)
         {
-            var response = await _http.GetFromJsonAsync<SuplierListResponse>("api/Suplier/get-all");
-            return response.Data;
+            _httpClient = httpClient;
+            _localStorage = localStorage;
+        }
+        public SuplierService() { }
+
+        // Phương thức này sẽ gọi API để thêm nhà cung cấp
+
+        public async Task<List<SuplierModel>> GetAllSupliersAsync()
+        {
+            try
+            {
+                var result = await _httpClient.GetFromJsonAsync<ListSuplierModel>("api/Suplier/get-all");
+                return result.Data;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        public async Task<int> CreateSuplierAsync(SuplierModel model)
+        {
+            try
+            {
+                // Gửi POST request tới API
+                var response = await _httpClient.PostAsJsonAsync("api/Supliers", model);
+
+                if (response.IsSuccessStatusCode)
+                { // Đọc dữ liệu trả về từ API (ID sản phẩm)
+                    var suplier = await response.Content.ReadFromJsonAsync<SuplierResponse>();
+                    return suplier.Data.Id;
+                }
+                else
+                {
+                    return -1;
+                    //throw new Exception("Failed to create product");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Xử lý ngoại lệ
+                Console.WriteLine($"Error: {ex.Message}");
+                throw new Exception("API call failed");
+            }
+        }// Trả về true nếu thành công, ngược lại là false
+        public async Task<bool> Delete(int id)
+        {
+            //await AddJwtHeader();
+            try
+            {
+                // Gửi yêu cầu DELETE tới API
+                var response = await _httpClient.DeleteAsync($"api/Suplier");
+                var msg = await response.Content.ReadFromJsonAsync<MessageResponse>();
+                Console.WriteLine(msg.Message);
+                // Kiểm tra nếu yêu cầu thành công (status code 200-299)
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                // Xử lý ngoại lệ nếu có lỗi trong quá trình gọi API
+                Console.WriteLine($"Error: {ex.Message}");
+                return false; // Xóa thất bại do lỗi
+            }
         }
     }
 }

@@ -3,9 +3,12 @@
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
 @inject ProductService Service
+@inject SuplierService SuplierService
 @inject IJSRuntime JS
 @inject HttpClient Http
 @using System.Net.Http.Json
+@using AdminUI.ApiServices
+@using AdminUI.Dialogs.Suplier
 @using ClosedXML.Excel;
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
@@ -67,8 +70,48 @@
     <MudTabPanel Text="Nhãn hàng" Icon="@Icons.Material.Filled.BugReport" >
 
     </MudTabPanel>
-    <MudTabPanel Text="Nhà cung cấp" Icon="@Icons.Material.Filled.BugReport" >
+    <MudTabPanel Text="Nhà cung cấp" Icon="@Icons.Material.Filled.Api" >
+        <div class="pt-10 px-10">
+            <MudDataGrid T="SuplierModel" Items="supliers" RowClick="OnSuplierRowClick">
 
+                <ToolBarContent>
+                    <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
+                        <MudTooltip Text="Thêm nhà cung cấp">
+                            <MudIconButton Icon="@Icons.Material.Filled.Add" @onclick="OpenAddSuplierDialogAsync"></MudIconButton>
+                        </MudTooltip>
+                    </MudButtonGroup>
+                    <MudSpacer />
+                    <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.End" Immediate="true"
+                                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="ml-1"></MudTextField>
+                </ToolBarContent>
+            </MudDataGrid>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Tên nhà cung cấp</th>
+                        <th>Địa chỉ</th>
+                        <th>Email</th>
+                        <th>Số điện thoại</th>
+                        <th>Ngừng cung cấp</th>
+                        <th>Người liên hệ</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var suplier in filteredSupliers)
+                    {
+                        <tr>
+                            <td>@suplier.Name</td>
+                            <td>@suplier.Address</td>
+                            <td>@suplier.Email</td>
+                            <td>@suplier.PhoneNumber</td>
+                            <td>@(suplier.Discontinued ? "Yes" : "No")</td>
+                            <td>@suplier.ContactPerson</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </MudTabPanel>
 </MudTabs>
 
@@ -93,6 +136,60 @@
     };
 </script>
 @code {
+    private async Task OpenAddSuplierDialogAsync()
+    {
+        loading = true;
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var dialog = await DialogService.ShowAsync<AddSuplierDialog>("Thêm nhà cung cấp", options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is SuplierModel newSuplier)
+        {
+            // Thêm nhà cung cấp mới vào danh sách
+            await Task.Delay(500);
+            newSuplier.Id = await SuplierService.CreateSuplierAsync(newSuplier);
+            if (newSuplier.Id != -1)
+            {
+
+                Data.Insert(0, newSuplier);
+                Snackbar.Add("Đã thêm nhà cung cấp thành công!", Severity.Success);
+                StateHasChanged();
+            }
+            else
+            {
+                Snackbar.Add("Đã xảy ra lỗi :(", Severity.Error);
+            }
+        }
+        loading = false;
+    }
+    void ShowDetailSuplier(SuplierModel item)
+    {
+        OpenDialogAsync();
+    }
+    private void OnSuplierRowClick(DataGridRowClickEventArgs<SuplierModel> args)
+    {
+        var selectedItem = args.Item; // Lấy nhà cung cấp được nhấp vào
+        OpenViewDialog(selectedItem);  // Mở hộp thoại với dữ liệu nhà cung cấp
+    }
+
+
+    private void OpenViewDialog(SuplierModel suplier)
+    {
+        var parameters = new DialogParameters { ["suplier"] = suplier }; // Truyền thông tin nhà cung cấp
+        DialogService.Show<ViewSuplierDialog>("Chi tiết nhà cung cấp", parameters); // Hiển thị hộp thoại
+    }
+    private List<SuplierModel> supliers = new List<SuplierModel>();
+    private List<SuplierModel> filteredSupliers => supliers.Where(s =>
+    s.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+    s.Email.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+    s.PhoneNumber.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+    private string searchTerm = string.Empty;
+    private async Task AddSuplier()
+    {
+        var newSuplier = new SuplierModel();
+        await Http.PostAsJsonAsync("api/suppliers", newSuplier);
+        supliers.Add(newSuplier);
+    }
     #region fields - Properties
     private bool loading = true;
     private List<string> _events = new();

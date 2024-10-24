@@ -5,7 +5,7 @@
 @inject ImportServices Service
 @inject ProductService ProductService
 @inject WarehouseServices WarehouseService
-@inject SuplierServices SuplierService
+@inject SuplierService SuplierService
 @inject CategoryServices CategoryService
 @inject HttpClient Http
 @inject ISnackbar Snackbar
@@ -115,7 +115,7 @@
     protected async override Task OnInitializedAsync()
     {
         ProductData = await ProductService.GetAllAsync();
-        SuplierData = await SuplierService.GetAllAsync();
+        SuplierData = await SuplierService.GetAllSupliersAsync();
         WarehouseData = await WarehouseService.GetAllAsync();
         //ItemList = Mapper.Map<List<SelectImportItem>>(ProductData);
     }

@@ -1,0 +1,51 @@
+﻿<MudDialog>
+    <DialogContent>
+        <MudForm @ref="form" Spacing="spacing" style="width:400px">
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Name" @bind-Value="name" Required="true" RequiredError="Name is required" />
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Address" @bind-Value="address" Required="true" RequiredError="Address is required" />
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Email" @bind-Value="email" Required="true" RequiredError="Email is required" />
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Phone Number" @bind-Value="phoneNumber" Required="true" RequiredError="Phone Number is required" />
+            <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Contact Person" @bind-Value="contactPerson" Required="true" RequiredError="Contact Person is required" />
+            <MudCheckBox Variant="Variant.Outlined" Margin="Margin.Dense" T="string" @bind-Checked="discontinued" Label="Discontinued" />
+
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Tertiary" OnClick="SubmitForm">Xác nhận</MudButton>
+        <MudButton Variant="Variant.Text" Color="Color.Secondary" OnClick="Cancel">Hủy</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    private MudForm form;
+    private string id;
+    private string name;
+    private string address;
+    private string email;
+    private string phoneNumber;
+    private string contactPerson;
+    private bool discontinued;
+
+    private async Task SubmitForm()
+    {
+        await form.Validate();
+        if (form.IsValid)
+        {
+            // Form is valid, close the dialog and pass the data
+            var suplierData = new SuplierModel(0,name, address, email, phoneNumber, discontinued, contactPerson);
+            MudDialog.Close(DialogResult.Ok(suplierData));
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    int spacing = 0;
+    private void OnInvalidSubmit()
+    {
+        // Handle invalid form submission (e.g., display error messages)
+    }
+
+}
