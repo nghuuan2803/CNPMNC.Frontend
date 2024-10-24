@@ -17,15 +17,10 @@
                          EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column" SelectedItem="tempItem" CommittedItemChanges="CommittedItemChanges"
                          Virtualize="true" Loading="loading" Height="400px" FixedHeader="true">
                 <ToolBarContent>
-
-
                     <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
                         <MudTooltip Text="Thêm sản phẩm">
                             <MudIconButton Icon="@Icons.Material.Filled.Add" @onclick="OpenDialogAsync"></MudIconButton>
                         </MudTooltip>
-                        @*             <MudTooltip Text="Nhập từ file excel">
-                        <MudIconButton Icon="@Icons.Material.Filled.FilePresent" @onclick="@(()=>ShowMessage($"Tính năng chưa mở","addmulti"))"></MudIconButton>
-                        </MudTooltip> *@
                         <MudTooltip Text="Nhập từ file excel">
                             <MudFileUpload T="IBrowserFile" FilesChanged="UploadFiles">
                                 <ActivatorContent>

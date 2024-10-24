@@ -21,10 +21,7 @@
                  EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column" SelectedItem="tempItem"
                  Virtualize="true" Loading="loading" Height="400px" FixedHeader="true">
         <ToolBarContent>
-
-            <MudTooltip Text="Thêm kho">
-                <MudIconButton Color="Color.Tertiary" Icon="@Icons.Material.Filled.Add" @onclick="OpenAddDialogAsync"></MudIconButton>
-            </MudTooltip>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AddCircle" @onclick="OpenAddDialogAsync">Nhập đơn</MudButton>
             <MudSpacer />
             <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.End" Immediate="true"
                           AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
@@ -112,13 +109,16 @@
         if (string.IsNullOrWhiteSpace(_searchString))
             return true;
 
-        // if (x.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
-        //     return true;
+        if (x.Id.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
 
-        // if (x.Email.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
-        //     return true;
+        if (x.WarehouseName.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
 
-        if ($"{x.Id} {x.SuplierId}".Contains(_searchString))
+        if (x.SuplierName.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if ($"{x.SuplierName}".Contains(_searchString))
             return true;
 
         return false;
@@ -165,7 +165,7 @@
             // Thêm sản phẩm mới vào danh sách
             await Task.Delay(500);
             var dataResponse = await Service.CreateAsync(model);
-            if (dataResponse!=null)
+            if (dataResponse != null)
             {
                 Data.Insert(0, dataResponse);
                 Snackbar.Add("Đã thêm đại lý thành công!", Severity.Success);
@@ -180,7 +180,7 @@
     }
     async void ShowDeleteConfirmation(ImportModel model)
     {
-        
+
     }
 
     private void NavigateTo(string page)

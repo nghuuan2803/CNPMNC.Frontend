@@ -16,6 +16,91 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <div class="pt-10 px-10">
+    <MudTabs Elevation="1" Rounded="false" Centered="true">
+        <MudTabPanel Text="Tất cả">
+            <MudDataGrid T="ExportModel" ReadOnly="false" EditMode="DataGridEditMode.Form" QuickFilter="@_quickFilter"
+                         Bordered="true" Dense="true" Items="Data" Filterable="false" Hover="true" RowClick="OnRowClick"
+                         EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column" SelectedItem="tempItem" CommittedItemChanges="CommittedItemChanges"
+                         Virtualize="true" Loading="loading" Height="400px" FixedHeader="true">
+                <ToolBarContent>
+
+                    <MudTooltip Text="Thêm kho">
+                        <MudIconButton Color="Color.Tertiary" Icon="@Icons.Material.Filled.Add" @onclick="OpenAddDialogAsync"></MudIconButton>
+                    </MudTooltip>
+                    <MudSpacer />
+                    <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.End" Immediate="true"
+                                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+
+                </ToolBarContent>
+                <Columns>
+                    <HierarchyColumn T="ExportModel" ButtonDisabledFunc="@(x => x.Id == 0)" />
+                    <PropertyColumn Class="w-1" Property="x => x.Id" Title="Mã đơn" Editable="false" />
+                    <PropertyColumn Property="x => x.Amount" Title="Tiền nhập" />
+                    <PropertyColumn Format="dd/MM/yyyy" Property="x => x.CreatedOn" Title="Ngày nhập" />
+                    <PropertyColumn Property="x => x.ManagerName" Title="Người nhập" />
+
+                    <TemplateColumn Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-center">
+                        <CellTemplate>
+                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Color="Color.Warning" OnClick="@context.Actions.StartEditingItemAsync" />
+                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="()=> ShowDeleteConfirmation(context.Item)" />
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+                <ChildRowContent>
+                    <MudText>Ngày hoàn thành: @context.Item.CompletedDate</MudText>
+                </ChildRowContent>
+                <PagerContent>
+                    <MudDataGridPager T="ExportModel" />
+                </PagerContent>
+            </MudDataGrid>
+        </MudTabPanel>
+        <MudTabPanel Text="Đơn hàng"  BadgeData='"3"' BadgeColor="Color.Error">
+            <MudDataGrid T="ExportModel" ReadOnly="false" EditMode="DataGridEditMode.Form"
+                         Bordered="true" Dense="true" Items="Data" Filterable="false" Hover="true" RowClick="OnRowClick"
+                         EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column" SelectedItem="tempItem" CommittedItemChanges="CommittedItemChanges"
+                         Virtualize="true" Loading="loading" Height="400px" FixedHeader="true">
+                <ToolBarContent>
+
+                    <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
+                        <MudTooltip Text="Nhập đơn hàng">
+                            <MudIconButton Icon="@Icons.Material.Filled.Add"></MudIconButton>
+                        </MudTooltip>
+                        <MudTooltip Text="Nhập từ file excel">
+                            <MudFileUpload T="IBrowserFile">
+                                <ActivatorContent>
+                                    <MudIconButton Icon="@Icons.Material.Filled.FilePresent"></MudIconButton>
+                                </ActivatorContent>
+                            </MudFileUpload>
+                        </MudTooltip>
+                        <MudTooltip Text="Xuất danh sách ra file excel">
+                            <MudIconButton Icon="@Icons.Material.Filled.Download"></MudIconButton>
+                        </MudTooltip>
+                    </MudButtonGroup>
+
+                </ToolBarContent>
+                <Columns>
+                    <HierarchyColumn T="ExportModel" ButtonDisabledFunc="@(x => x.Id == 0)" />
+                    <PropertyColumn Class="w-1" Property="x => x.Id" Title="Mã đơn" Editable="false" />
+                    <PropertyColumn Property="x => x.Amount" Title="Tổng thanh toán" />
+                    <PropertyColumn Format="dd/MM/yyyy" Property="x => x.CreatedOn" Title="Ngày tạo đơn" />
+                    <PropertyColumn Property="x => x.AgencyName" Title="Đại lý" />
+
+                    <TemplateColumn Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-center">
+                        <CellTemplate>
+                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Color="Color.Warning" OnClick="@context.Actions.StartEditingItemAsync" />
+                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="()=> ShowDeleteConfirmation(context.Item)" />
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+                <ChildRowContent>
+                    <MudText>Ngày hoàn thành: @context.Item.CompletedDate</MudText>
+                </ChildRowContent>
+                <PagerContent>
+                    <MudDataGridPager T="ExportModel" />
+                </PagerContent>
+            </MudDataGrid>
+        </MudTabPanel>
+    </MudTabs>
     <MudDataGrid T="ExportModel" ReadOnly="false" EditMode="DataGridEditMode.Form" QuickFilter="@_quickFilter"
                  Bordered="true" Dense="true" Items="Data" Filterable="false" Hover="true" RowClick="OnRowClick"
                  EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column" SelectedItem="tempItem" CommittedItemChanges="CommittedItemChanges"

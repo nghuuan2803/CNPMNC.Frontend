@@ -51,7 +51,8 @@ namespace AdminUI.ApiServices
                 if (response.IsSuccessStatusCode)
                 {
                     // Đọc dữ liệu trả về từ API (ID sản phẩm)
-                    return await response.Content.ReadFromJsonAsync<ImportModel>();
+                    var data = await response.Content.ReadFromJsonAsync<ImportResponse>();
+                    return data.Data;
                     
                 }
                 else

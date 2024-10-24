@@ -2,10 +2,10 @@
 {
     public class UpdateImportStatus
     {
-        public int ImportId { get; set; }
+        public string ImportId { get; set; }
         public int Status { get; set; }
 
-        public UpdateImportStatus(int importId, int status)
+        public UpdateImportStatus(string importId, int status)
         {
             ImportId = importId;
             Status = status;
