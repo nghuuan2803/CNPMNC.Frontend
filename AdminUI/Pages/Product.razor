@@ -62,12 +62,13 @@
     <MudTabPanel Text="Danh mục" Icon="@Icons.Material.Filled.BugReport">
 
     </MudTabPanel>
-    <MudTabPanel Text="Nhãn hàng" Icon="@Icons.Material.Filled.BugReport" >
+    <MudTabPanel Text="Nhãn hàng" Icon="@Icons.Material.Filled.BugReport">
 
     </MudTabPanel>
-    <MudTabPanel Text="Nhà cung cấp" Icon="@Icons.Material.Filled.Api" >
+    <MudTabPanel Text="Nhà cung cấp" Icon="@Icons.Material.Filled.Api">
         <div class="pt-10 px-10">
-            <MudDataGrid T="SuplierModel" Items="supliers" RowClick="OnSuplierRowClick">
+            <MudDataGrid T="SuplierModel" Items="supliers" RowClick="OnSuplierRowClick" Dense="true" EditMode="DataGridEditMode.Form" CommittedItemChanges=""
+            EditTrigger="DataGridEditTrigger.Manual">
 
                 <ToolBarContent>
                     <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
@@ -79,33 +80,23 @@
                     <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.End" Immediate="true"
                                   AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="ml-1"></MudTextField>
                 </ToolBarContent>
+                <Columns>
+                    <PropertyColumn Property="p=>p.Id" Title="#" />
+                    <PropertyColumn Property="p=>p.Name" Title="Tên" />
+                    <PropertyColumn Property="p=>p.Address" Title="Địa chỉ" />
+                    <PropertyColumn Property="p=>p.Email" />
+                    <PropertyColumn Property="p=>p.PhoneNumber" Title="SĐT" />
+                    <PropertyColumn Property="p=>p.ContactPerson" Title="SĐT" />
+                    <TemplateColumn Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-end">
+                        <CellTemplate>
+                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Color="Color.Warning" OnClick="@context.Actions.StartEditingItemAsync" />
+                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="()=> ShowDeleteSuplierConfirm(context.Item)" />
+                            @* <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.MoreVert" Color="Color.Dark" OnClick="()=> ShowDeleteConfirmation(context.Item)" /> *@
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
             </MudDataGrid>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Tên nhà cung cấp</th>
-                        <th>Địa chỉ</th>
-                        <th>Email</th>
-                        <th>Số điện thoại</th>
-                        <th>Ngừng cung cấp</th>
-                        <th>Người liên hệ</th>
 
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var suplier in filteredSupliers)
-                    {
-                        <tr>
-                            <td>@suplier.Name</td>
-                            <td>@suplier.Address</td>
-                            <td>@suplier.Email</td>
-                            <td>@suplier.PhoneNumber</td>
-                            <td>@(suplier.Discontinued ? "Yes" : "No")</td>
-                            <td>@suplier.ContactPerson</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
         </div>
     </MudTabPanel>
 </MudTabs>
@@ -146,7 +137,7 @@
             if (newSuplier.Id != -1)
             {
 
-                Data.Insert(0, newSuplier);
+                supliers.Insert(0, newSuplier);
                 Snackbar.Add("Đã thêm nhà cung cấp thành công!", Severity.Success);
                 StateHasChanged();
             }
@@ -213,6 +204,7 @@
             await Task.Delay(300);
             loading = true;
             Data = await Service.GetAllAsync();
+            supliers = await SuplierService.GetAllSupliersAsync();
         }
         catch
         {
@@ -469,4 +461,25 @@
 
         DialogService.Show<ViewProductDialog>("Chi tiết sản phẩm", parameters, options); //Bật dialog
     }
+
+
+    #region suplier
+    private async Task ShowDeleteSuplierConfirm(SuplierModel model)
+    {
+        var result = await SuplierService.Delete(model.Id);
+        if(result)
+        {
+            Snackbar.Add("Xóa thành công", Severity.Success);
+            supliers.Remove(model);
+        }
+        else
+        {
+            Snackbar.Add("Xóa thất bại", Severity.Error);            
+        }
+    }
+    private async Task OnCommittedSuplierChanges(SuplierModel model)
+    {
+        //ông tự làm tiếp đi
+    }
+    #endregion
 }

@@ -35,7 +35,7 @@ namespace AdminUI.ApiServices
             try
             {
                 // Gửi POST request tới API
-                var response = await _httpClient.PostAsJsonAsync("api/Supliers", model);
+                var response = await _httpClient.PostAsJsonAsync("api/Suplier", model); //sai chinh ta
 
                 if (response.IsSuccessStatusCode)
                 { // Đọc dữ liệu trả về từ API (ID sản phẩm)
@@ -61,10 +61,7 @@ namespace AdminUI.ApiServices
             try
             {
                 // Gửi yêu cầu DELETE tới API
-                var response = await _httpClient.DeleteAsync($"api/Suplier");
-                var msg = await response.Content.ReadFromJsonAsync<MessageResponse>();
-                Console.WriteLine(msg.Message);
-                // Kiểm tra nếu yêu cầu thành công (status code 200-299)
+                var response = await _httpClient.DeleteAsync($"api/Suplier/delete/"+id);
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)
