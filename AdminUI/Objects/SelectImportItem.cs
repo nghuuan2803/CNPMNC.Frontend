@@ -4,8 +4,8 @@
     {
         public int Id { get; set; }
 
-        public int ImportId { get; set; }
-        public int ProductId { get; set; }
+        public string ImportId { get; set; }
+        public string ProductId { get; set; }
 
         public string Name { get; set; }
 
@@ -18,5 +18,7 @@
         public string CategoryName { get; set; }
 
         public string BrandName { get; set; }
+
+        public int Number { get; set; }
     }
 }

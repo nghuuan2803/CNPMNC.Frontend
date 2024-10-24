@@ -17,8 +17,8 @@
 
 <div class="pt-10 px-10">
     <MudDataGrid T="ImportModel" ReadOnly="false" EditMode="DataGridEditMode.Form" QuickFilter="@_quickFilter"
-                 Bordered="true" Dense="true" Items="Data" Filterable="false" Hover="true" RowClick="OnRowClick"
-                 EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column" SelectedItem="tempItem" CommittedItemChanges="CommittedItemChanges"
+                 Bordered="true" Dense="false" Items="Data" Filterable="false" Hover="true" RowClick="OnRowClick"
+                 EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column" SelectedItem="tempItem"
                  Virtualize="true" Loading="loading" Height="400px" FixedHeader="true">
         <ToolBarContent>
 
@@ -31,24 +31,13 @@
 
         </ToolBarContent>
         <Columns>
-            <HierarchyColumn T="ImportModel" ButtonDisabledFunc="@(x => x.Id == 0)" />
             <PropertyColumn Class="w-1" Property="x => x.Id" Title="Mã đơn" Editable="false" />
             <PropertyColumn Property="x => x.WarehouseName" Title="Kho" />
             <PropertyColumn Property="x => x.SuplierName" Title="Nhà cung cấp" />
-            <PropertyColumn Property="x => x.Amount" Title="Tiền nhập" />
+            <PropertyColumn Format="@("#,0 đ")" Property="x => x.Amount" Title="Tiền nhập" />
             <PropertyColumn Format="dd/MM/yyyy" Property="x => x.CreatedOn" Title="Ngày nhập" />
             <PropertyColumn Property="x => x.ManagerName" Title="Người nhập" />
-
-            <TemplateColumn Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-center">
-                <CellTemplate>
-                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Color="Color.Warning" OnClick="@context.Actions.StartEditingItemAsync" />
-                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="()=> ShowDeleteConfirmation(context.Item)" />
-                </CellTemplate>
-            </TemplateColumn>
         </Columns>
-        <ChildRowContent>
-            <MudText>Ngày hoàn thành: @context.Item.CompletedDate</MudText>
-        </ChildRowContent>
         <PagerContent>
             <MudDataGridPager T="ImportModel" />
         </PagerContent>
@@ -152,20 +141,9 @@
 
     async void CommittedItemChanges(ImportModel item)
     {
-        _events.Insert(0, $"Event = CommittedItemChanges, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
-        var result = await Service.Update(item);
-        if (!result)
-        {
-            Snackbar.Add("Không thể cập nhật!", Severity.Error);
-            Data.Remove(item);
-            Data.Insert(0, tempItem);
-            StateHasChanged();
-        }
-        else
-        {
-            Snackbar.Add("Đã cập nhật sản phẩm thành công!", Severity.Success);
-        }
     }
+
+
     void ShowMessage(string msg, string key = null!)
     {
         var config = (SnackbarOptions options) =>
@@ -175,20 +153,6 @@
         Snackbar.Add(msg, Severity.Info, configure: config, key: key);
     }
 
-
-    private async Task ShowDeleteConfirmation(ImportModel item)
-    {
-        var parameters = new DialogParameters { ["Message"] = $"Hãy cân nhắc kỹ trước khi xóa đơn [{item.Id}]" };
-        var options = new DialogOptions { CloseButton = false, CloseOnEscapeKey = true };
-
-        var dialog = DialogService.Show<ConfirmDialog>("Xác nhận xóa?", parameters, options);
-        var result = await dialog.Result;
-
-        if (!result!.Canceled)
-        {
-            DeleteItem(item);
-        }
-    }
     private async Task OpenAddDialogAsync()
     {
         loading = true;
@@ -200,10 +164,10 @@
         {
             // Thêm sản phẩm mới vào danh sách
             await Task.Delay(500);
-            bool formResult = await Service.CreateAsync(model);
-            if (formResult)
+            var dataResponse = await Service.CreateAsync(model);
+            if (dataResponse!=null)
             {
-                Data.Insert(0, model);
+                Data.Insert(0, dataResponse);
                 Snackbar.Add("Đã thêm đại lý thành công!", Severity.Success);
                 StateHasChanged();
             }
@@ -214,25 +178,10 @@
         }
         loading = false;
     }
-
-    private async void DeleteItem(ImportModel item)
+    async void ShowDeleteConfirmation(ImportModel model)
     {
-
-        var result = await Service.Delete(item.Id); //gọi api xóa trên server
-        if (result == true) //kiểm tra kết quả
-        {
-            Data.Remove(item); //Xóa tại frontend
-            StateHasChanged();
-            //Snackbar.Add($"Xóa thành công", Severity.Info);
-            //tạo toast thông báo
-            Snackbar.Add($"Xóa thành công", Severity.Info);
-        }
-        else
-        {
-            Snackbar.Add($"Không thể xóa", Severity.Error);
-        }
+        
     }
-
 
     private void NavigateTo(string page)
     {
@@ -241,10 +190,10 @@
 
     private void OpenViewDialog(ImportModel model)
     {
-        var parameters = new DialogParameters { ["Data"] = model }; //gửi tham chiếu tới dialog
-        var options = new DialogOptions { CloseOnEscapeKey = true }; //cho phép tắt dialog khi bấm nút Esc
+        var parameters = new DialogParameters { ["Model"] = model }; //gửi tham chiếu tới dialog
+        var options = new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseOnEscapeKey = true, NoHeader = true };
 
-        DialogService.Show<ImportViewDialog>("Thông nhân viên", parameters, options); //Bật dialog
+        DialogService.Show<ImportViewDialog>("Thông tin phiếu nhập", parameters, options); //Bật dialog
     }
     #endregion
 

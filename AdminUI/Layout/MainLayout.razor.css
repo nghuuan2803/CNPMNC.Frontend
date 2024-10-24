@@ -44,11 +44,19 @@ main {
     .top-row ::deep a, .top-row ::deep .btn-link {
         margin-left: 0;
     }
+
+    .onsmallscreen {
+        display: none;
+    }
 }
 
 @media (min-width: 641px) {
     .page {
         flex-direction: row;
+    }
+
+    .onsmallscreen {
+        display: inline;
     }
 
     .sidebar {

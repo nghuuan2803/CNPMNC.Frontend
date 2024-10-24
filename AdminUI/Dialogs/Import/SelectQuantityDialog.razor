@@ -1,5 +1,29 @@
-﻿<h3>SelectQuantityDialog</h3>
+﻿@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [Parameter] public ProductModel Model { get; set; }
 
-@code {
+    int qty = 100;
 
+    void Confirm()
+    {
+        Model.Quantity = qty;
+        MudDialog.Close(DialogResult.Ok(Model));
+    }
+    void Cancel() => MudDialog.Cancel();
 }
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.AddCircle" Color="Color.Warning" Size="Size.Large" Class="mr-3" /> Nhập số liệu
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="int" @bind-Value=qty Label="Số lượng" />
+        <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="double" @bind-Value=Model.ImportPrice Label="Giá nhập " />
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Tertiary" OnClick="Confirm">Xác nhận</MudButton>
+        <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="Cancel">Hủy</MudButton>
+    </DialogActions>
+</MudDialog>

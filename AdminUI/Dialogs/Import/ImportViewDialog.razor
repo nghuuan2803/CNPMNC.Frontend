@@ -1,5 +1,59 @@
-﻿<h3>ImportViewDialog</h3>
+﻿@using AdminUI.ApiServices
+@inject ImportServices Service
+<MudDialog>
+    <DialogContent>
+        <div class="ma-5">
+            <div class="row">
+                <div class="col-3">
+                    <MudStack Justify="Justify.FlexStart" AlignItems="AlignItems.End">
+                        <MudText>Số chứng từ</MudText>
+                        <MudText>Ngày nhập</MudText>
+                        <MudText>Người nhập</MudText>
+                        <MudText>Tổng số tiền</MudText>
+                    </MudStack>
+                </div>
+                <div class="col-9">
+                    <MudStack Justify="Justify.FlexStart" AlignItems="AlignItems.Start">
+                        <MudText>@Data.Id</MudText>
+                        <MudText>@Data.CreatedOn</MudText>
+                        <MudText>@Data.OrderBy</MudText>
+                        <MudText>@Data.Amount.ToString("#,0 đ")</MudText>
+                    </MudStack>
+                </div>
+            </div>
+
+            <MudDataGrid T="ImportItem" ReadOnly="false" EditMode="DataGridEditMode.Form"
+                         Bordered="false" Dense="true" Items="Data.Items" Filterable="false" Hover="true" SortMode="SortMode.None"
+                         EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column"
+                         FixedHeader="true">
+                <Columns>
+                    <PropertyColumn Class="w-1" Property="x => x.ProductId" Title="#" Editable="false" />
+                    <PropertyColumn Property="x => x.ProductName" Title="Sản phẩm" Editable="false" />
+                    <PropertyColumn Format="@("#,0 đ")" Property="x => x.UnitPrice" Title="Giá nhập" />
+                    <PropertyColumn Property="x => x.Quantity" Title="Số lượng" />
+                    <PropertyColumn Format="@("#,0 đ")" Property="x => x.UnitPrice*x.Quantity" Title="Thành tiền" Editable="false" />
+                </Columns>
+            </MudDataGrid>
+        </div>
+    </DialogContent>
+</MudDialog>
 
 @code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
 
+    [Parameter]
+    public ImportModel Model { get; set; }
+    public ImportModel Data { get; set; } = new();
+
+
+    protected async override Task OnInitializedAsync()
+    {
+        Data = await Service.GetAsync(Model.Id);
+    }
+
+    private void Close()
+    {
+        MudDialog.Close(DialogResult.Ok(true));
+    }
 }

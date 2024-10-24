@@ -32,7 +32,13 @@ namespace AdminUI.ApiServices
             }
         }
 
-        public async Task<bool> CreateAsync(ImportModel model)
+        public async Task<ImportModel> GetAsync(string id)
+        {
+            var data = await _http.GetFromJsonAsync<ImportResponse>("api/Import/get/"+id);
+            return data.Data;
+        }
+
+        public async Task<ImportModel> CreateAsync(ImportModel model)
         {
             //await AddJwtHeader();
 
@@ -45,12 +51,12 @@ namespace AdminUI.ApiServices
                 if (response.IsSuccessStatusCode)
                 {
                     // Đọc dữ liệu trả về từ API (ID sản phẩm)
-                    // var Import = await response.Content.ReadFromJsonAsync<ImportResponse>();
-                    return true;
+                    return await response.Content.ReadFromJsonAsync<ImportModel>();
+                    
                 }
                 else
                 {
-                    return false;
+                    return null!;
                     //throw new Exception("Failed to create Import");
                 }
             }
@@ -61,75 +67,7 @@ namespace AdminUI.ApiServices
                 throw new Exception("API call failed");
             }
         }
-        public async Task<bool> UpdateStatus(int importId, int status)
-        {
-            //await AddJwtHeader();
 
-            try
-            {
-                var model  = new UpdateImportStatus(importId, status);
-                // Gửi POST request tới API
-                var response = await _http.PostAsJsonAsync("api/Import", model);
-
-                // Kiểm tra kết quả
-                if (response.IsSuccessStatusCode)
-                {
-                    // Đọc dữ liệu trả về từ API (ID sản phẩm)
-                    // var Import = await response.Content.ReadFromJsonAsync<ImportResponse>();
-                    return true;
-                }
-                else
-                {
-                    return false;
-                    //throw new Exception("Failed to create Import");
-                }
-            }
-            catch (Exception ex)
-            {
-                // Xử lý ngoại lệ
-                Console.WriteLine($"Error: {ex.Message}");
-                throw new Exception("API call failed");
-            }
-        }
-        public async Task<bool> Update(ImportModel model)
-        {
-            await AddJwtHeader();
-            try
-            {
-                // Gửi POST request tới API
-                var response = await _http.PutAsJsonAsync("api/Import", model);
-                var msg = await response.Content.ReadFromJsonAsync<MessageResponse>();
-                Console.WriteLine(msg.Message);
-                // Kiểm tra kết quả
-                return response.IsSuccessStatusCode;
-            }
-            catch (Exception ex)
-            {
-                // Xử lý ngoại lệ
-                Console.WriteLine($"API call failed");
-                //throw new Exception("API call failed");
-                return false;
-            }
-        }
-        public async Task<bool> Delete(int id)
-        {
-            await AddJwtHeader();
-            try
-            {
-                // Gửi yêu cầu DELETE tới API
-                var response = await _http.DeleteAsync($"api/Import/delete/{id}");
-                var msg = await response.Content.ReadFromJsonAsync<MessageResponse>();
-                Console.WriteLine(msg.Message);
-                // Kiểm tra nếu yêu cầu thành công (status code 200-299)
-                return response.IsSuccessStatusCode;
-            }
-            catch (Exception ex)
-            {
-                // Xử lý ngoại lệ nếu có lỗi trong quá trình gọi API
-                Console.WriteLine($"Error: {ex.Message}");
-                return false; // Xóa thất bại do lỗi
-            }
-        }
         #region TokenHandler
         private async Task<string> GetAccessTokenAsync()
         {

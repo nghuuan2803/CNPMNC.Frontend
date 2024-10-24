@@ -63,34 +63,7 @@ namespace AdminUI.Services
                 throw;
             }
         }
-        //public async Task<int> CreateAsync(CreateProduct model)
-        //{
-        //    try
-        //    {
-        //        //await AddJwtHeader();
-        //        // Gửi POST request tới API
-        //        var response = await _http.PostAsJsonAsync("api/Product/create", model);
 
-        //        // Kiểm tra kết quả
-        //        if (response.IsSuccessStatusCode)
-        //        {
-        //            // Đọc dữ liệu trả về từ API (ID sản phẩm)
-        //            var product = await response.Content.ReadFromJsonAsync<ProductResponse>();
-        //            return product.Data.Id;
-        //        }
-        //        else
-        //        {
-        //            return -1;
-        //            //throw new Exception("Failed to create product");
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // Xử lý ngoại lệ
-        //        Console.WriteLine($"Error: {ex.Message}");
-        //        throw new Exception("API call failed");
-        //    }
-        //}
         public async Task<ProductModel> CreateAsync(CreateProduct model)
         {
             try
