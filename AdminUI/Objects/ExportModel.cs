@@ -38,7 +38,7 @@
 
         public int ExportId { get; set; }
 
-        public int ProductId { get; set; }
+        public string ProductId { get; set; }
 
         public string? ProductName { get; set; }
 
@@ -64,8 +64,8 @@
     {
         public int Id { get; set; }
 
-        public int ImportId { get; set; }
-        public int ProductId { get; set; }
+        public string ImportId { get; set; }
+        public string ProductId { get; set; }
 
         public string Name { get; set; }
 

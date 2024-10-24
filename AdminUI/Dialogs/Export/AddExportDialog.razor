@@ -7,90 +7,10 @@
 @inject HttpClient Http
 @inject ISnackbar Snackbar
 
-<style>
-    .tab {
-        width: 300px;
-    }
-</style>
-
-<MudDialog Style="height:90vh">
+<MudDialog >
     <DialogContent>
-        <MudTabs @ref="tabs" Elevation="0" Rounded="true" Centered="true" Class="my-0" Color="Color.Inherit" Position="Position.Top">
-            <MudTabPanel Icon="@Icons.Material.Filled.Api" Text="Bước 1" BadgeData='"!"' BadgeColor="Color.Error">
-                <MudSelect @bind-Value=agency T="int" Label="Chọn đại lý">
-                    <MudSelectItem Value="1">Đại lý A</MudSelectItem>
-                    <MudSelectItem Value="2">Đại lý B</MudSelectItem>
-                    <MudSelectItem Value="3">Đại lý C</MudSelectItem>
-                    <MudSelectItem Value="4">Đại lý D</MudSelectItem>
-                </MudSelect>
-                <MudSelect @bind-Value=warehouse T="string" Label="Chọn kho">
-                    <MudSelectItem Value="@("W001")">Kho Media Củ Chi</MudSelectItem>
-                    <MudSelectItem Value="@("W002")">Kho điện lạnh Tân Phú </MudSelectItem>
-                    <MudSelectItem Value="@("W003")">Kho điện gia dụng Tân bình</MudSelectItem>
-                    <MudSelectItem Value="@("W004")">Kho phân loại Gò Vấp</MudSelectItem>
-                    <MudSelectItem Value="@("W005")">Kho hàng cũ</MudSelectItem>
-                </MudSelect>
-                <MudButton Color="Color.Tertiary" OnClick="OnStep1Next">Next</MudButton>
-            </MudTabPanel>
-            <MudTabPanel Icon="@Icons.Material.Filled.Build" Disabled="_step2" Text="Bước 2" BadgeData="1" BadgeColor="Color.Success" OnClick="LoadProductData">
-                <div class="pt-10 px-10">
-                    <MudDataGrid T="SelectExportItem" ReadOnly="false" EditMode="DataGridEditMode.Form" QuickFilter="@_quickFilterProduct"
-                                 Bordered="true" Dense="true" Items="ItemList" Filterable="false" Hover="true" CommittedItemChanges="SeclectItemCommit"
-                                 EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column"
-                                 Virtualize="true" Height="400px" FixedHeader="true">
-                        <ToolBarContent>
-                            <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.End" Immediate="true"
-                                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-                        </ToolBarContent>
-                        <Columns>
-                            <PropertyColumn Style="width:200px" Property="x => x.ProductId" Title="Id" Editable="false" />
-                            <PropertyColumn Property="x => x.Name" Title="Sản phẩm" Editable="false" />
-                            <PropertyColumn Property="x => x.ExportQty" Title="Số lượng xuất" />
-                            <PropertyColumn Property="x => x.ExportPrice" Title="Giá xuất" />
-                            <TemplateColumn Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-end">
-                                <CellTemplate>
-                                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Add" Color="Color.Warning" OnClick="context.Actions.StartEditingItemAsync" />
-                                </CellTemplate>
-                            </TemplateColumn>
-                        </Columns>
-                        <PagerContent>
-                            <MudDataGridPager T="SelectExportItem" />
-                        </PagerContent>
-                    </MudDataGrid>
-                    <MudButton Color="Color.Tertiary" OnClick="OnStep2Next">Next</MudButton>
-                </div>
-            </MudTabPanel>
-            <MudTabPanel Icon="@Icons.Material.Filled.Build" Text="Bước 3" Disabled="_step3" BadgeData="1" BadgeColor="Color.Success">
-                <div class="pt-10 px-10">
-                    <MudButton OnClick="Submit">Xác nhận</MudButton>
-                    <MudDataGrid T="SelectExportItem" ReadOnly="false" EditMode="DataGridEditMode.Form"
-                                 Bordered="true" Dense="true" Items="SelectedItem" Filterable="false" Hover="true" CommittedItemChanges="SeclectItemCommit"
-                                 EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column"
-                                 Virtualize="true" Height="400px" FixedHeader="true">
-                        <Columns>
-                            <PropertyColumn Style="width:200px" Property="x => x.Id" Title="Id" Editable="false" />
-                            <PropertyColumn Property="x => x.Name" Title="Sản phẩm" Editable="false" />
-                            <PropertyColumn Property="x => x.ExportQty" Title="Số lượng nhập" />
-                            <PropertyColumn Property="x => x.ExportPrice" Title="Giá nhập" />
-                            <TemplateColumn Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-end">
-                                <CellTemplate>
-                                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Remove" Color="Color.Warning" OnClick="context.Actions.StartEditingItemAsync" />
-                                </CellTemplate>
-                            </TemplateColumn>
-                        </Columns>
-                        <PagerContent>
-                            <MudDataGridPager T="SelectExportItem" />
-                        </PagerContent>
-                    </MudDataGrid>
-                    <MudButton Color="Color.Tertiary" OnClick="Submit">Next</MudButton>
-                </div>
-            </MudTabPanel>
-        </MudTabs>
+        
     </DialogContent>
-    @*     <DialogActions>
-    <MudButton Variant="Variant.Filled" Color="Color.Tertiary" OnClick="SubmitForm">Xác nhận</MudButton>
-    <MudButton Variant="Variant.Text" Color="Color.Secondary" OnClick="Cancel">Hủy</MudButton>
-    </DialogActions> *@
 </MudDialog>
 
 @code {

@@ -24,6 +24,7 @@ namespace AdminUI
             builder.Services.AddScoped<EmployeeServices>();
             builder.Services.AddScoped<AgencyServices>();
             builder.Services.AddScoped<ImportServices>();
+            builder.Services.AddScoped<ExportServices>();
             builder.Services.AddScoped<CategoryServices>();
             builder.Services.AddScoped<SuplierService>();
             builder.Services.AddScoped<BrandServices>();
