@@ -1,8 +1,9 @@
-﻿@inherits LayoutComponentBase
+﻿@using AdminUI.ApiServices
+
+@inherits LayoutComponentBase
 @inject NavigationManager Navigation
 @inject AuthenticationService AuthService
-
-
+@inject NotifyService NotifyService
 
 <MudThemeProvider />
 <MudPopoverProvider />
@@ -11,81 +12,82 @@
 @* <AuthorizeView> *@
 <MudLayout>
     <MudAppBar Elevation="10" Dense="@_dense" Style="@($"background:{Colors.Purple.Darken4};")">
-        <MudImage Src="ocean2.png" Width="40" Style="margin-left:-10px"/>
-        <h5 class="mx-3 mt-2 me-12 onsmallscreen">OceanVN</h5>
+        <MudImage Src="ocean2.png" Width="40" Style="margin-left:-10px" />
+        <h5 class="mx-3 mt-2 me-12 onsmallscreen">OceanVie</h5>
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Class="ms-2" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
-        <MudSpacer />
-        @* <MudPaper Outlined="true">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Variant="Variant.Filled" Color="Color.Primary" DropShadow="false" OnClick="@ToggleOpen">@(_openPopup ? "Close" : "Open")</MudIconButton>
-        <MudPopover Open="_openPopup" OverflowBehavior="OverflowBehavior.FlipOnOpen" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopCenter" Paper="false">
-        <MudPaper Outlined="true" Class="px-4 py-8">
-        <MudText>Scroll your browser to see effect.</MudText>
-        <MudLink Href="export" OnClick="@(()=>{_openPopup=false;})">Thông báo</MudLink>
-        </MudPaper>
-        </MudPopover>
-        </MudPaper> *@
 
-        @*             <MudMenu Class="" Icon="@Icons.Material.Filled.Notifications" Label="A menu with tooltip" Variant="Variant.Filled" Color="Color.Primary">
-        <div class="d-flex align-center">
-        <MudText Class="ml-4">1</MudText>
-        <MudTooltip Text="1 is good option">
-        <MudIconButton Class="mx-2" Icon="@Icons.Material.Outlined.Info" />
-        </MudTooltip>
-        </div>
-        <div class="d-flex align-center">
-        <MudText Class="ml-4">2</MudText>
-        <MudMenu Icon="@Icons.Material.Outlined.Mouse" ActivationEvent="@MouseEvent.MouseOver" Class="mx-2">
-        <ChildContent>
-        <MudMenuItem>Profile</MudMenuItem>
-        <MudMenuItem>Theme</MudMenuItem>
-        <MudMenuItem>Usage</MudMenuItem>
-        <MudMenuItem>Sign Out</MudMenuItem>
-        </ChildContent>
+        <MudSpacer />
+
+        <MudMenu AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter" Paper="false">
+            <ActivatorContent>
+                <MudBadge Content="@Notifications.Count" Color="Color.Primary" Overlap="true" Class="mx-6 my-4">
+                    <MudIcon Size="Size.Medium" Color="Color.Inherit" Icon="@Icons.Material.Filled.Notifications"></MudIcon>
+                </MudBadge>
+            </ActivatorContent>
+            <ChildContent>
+                <MudList T="string" Style="width:220px">
+                    <MudListItem Text="Đã đọc tất cả" Icon="@Icons.Material.Filled.Inbox" />
+                    <MudDivider />
+                    @foreach (var notify in Notifications)
+                    {                        
+                        <MudListItem Icon="@notify.GetIcon()">
+                            @notify.Content
+                            <a href="@notify.Link">Chi tiết</a>
+                        </MudListItem>
+                    }
+                </MudList>
+            </ChildContent>
         </MudMenu>
-        <MudTooltip Text="2 can be a better option">
-        <MudIconButton Class="mx-2" Icon="@Icons.Material.Outlined.Info" />
-        </MudTooltip>
-        </div>
-        <div class="d-flex align-center">
-        <MudText Class="ml-4">3</MudText>
-        <MudTooltip Text="3 is one more than 2">
-        <MudIconButton Class="mx-2" Icon="@Icons.Material.Outlined.Info" />
-        </MudTooltip>
-        </div>
-        </MudMenu> *@
-        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Href="" Target="_blank" />
-        @* Hello, @context.User.Identity?.Name! *@
-        Hello, An
-        <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" OnClick="Logout" />
+
+        <MudMenu IconColor="Color.Transparent" Icon="@Icons.Custom.Brands.GitHub" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter" Paper="false">
+            <ActivatorContent>
+                <MudAvatar Class="mx-2">
+                    <MudImage Src="man-avatar.webp" />
+                </MudAvatar>
+                <MudHidden Invert Breakpoint="Breakpoint.Md">
+                    <MudText Class="mt-2 mx-2">
+                        Hello, An!
+                    </MudText>
+                </MudHidden>
+            </ActivatorContent>
+            <ChildContent>
+                <MudPaper Outlined="true" Width="250px">
+                    <MudList T="string">
+                        <MudListItem Icon="@Icons.Material.Filled.Person">
+                            Thông tin cá nhân
+                        </MudListItem>
+                        <MudDivider DividerType="DividerType.FullWidth" />
+                        <MudListItem Icon="@Icons.Material.Filled.ChangeCircle">
+                            Đổi mật khẩu
+                        </MudListItem>
+                        <MudDivider DividerType="DividerType.FullWidth" />
+                        <MudDivider DividerType="DividerType.FullWidth" />
+                        <MudListItem Icon="@Icons.Material.Filled.ExitToApp" OnClick="Logout" IconColor="Color.Error">
+                            Đăng xuất
+                        </MudListItem>
+                    </MudList>
+                </MudPaper>
+            </ChildContent>
+        </MudMenu>
+
     </MudAppBar>
     <MudDrawer @bind-Open="@_open" ClipMode="_clipMode" Breakpoint="@_breakpoint" Elevation="1" Variant="@DrawerVariant.Mini" OpenMiniOnHover="true">
-        <MudNavMenu  Rounded="false" Bordered="true" Color="Color.Primary">
+        <MudNavMenu Rounded="false" Bordered="true">
             <MudNavLink Style="height:50px" IconColor="_iconColor" Href="dashboard" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
-@*             <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="inventory" Icon="@Icons.Material.Filled.Warehouse">Tồn kho</MudNavLink> *@
             <MudNavLink Style=@(_height) IconColor="_iconColor" Href="import" Icon="@Icons.Material.Filled.AddHomeWork">Nhập kho</MudNavLink>
             <MudNavLink Style=@(_height) IconColor="_iconColor" Href="export" Icon="@Icons.Material.Filled.ContentPasteGo">Xuất kho</MudNavLink>
+            <MudNavLink Style=@(_height) IconColor="_iconColor" Href="inventory" Icon="@Icons.Material.Filled.Warehouse">Tồn Kho</MudNavLink>
             <MudNavLink Style=@(_height) IconColor="_iconColor" Href="check" Icon="@Icons.Material.Filled.FactCheck">Kiểm kho</MudNavLink>
-            <MudNavLink Style=@(_height) IconColor="_iconColor" Href="history" Icon="@Icons.Material.Filled.WorkHistory">Hoàn kho</MudNavLink>
-            <MudNavLink Style=@(_height) IconColor="_iconColor" Href="warehouse" Icon="@Icons.Material.Filled.Warehouse">Tồn Kho</MudNavLink>
-            @* <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="dounut-chart" Icon="@Icons.Material.Filled.InsertChart">Thống kê</MudNavLink> *@
+            <MudNavLink Style=@(_height) IconColor="_iconColor" Href="return" Icon="@Icons.Material.Filled.AssignmentReturn">Hoàn kho</MudNavLink>
             <MudNavLink Style=@(_height) IconColor="_iconColor" Href="employee" Icon="@Icons.Material.Filled.Groups">Nhân viên</MudNavLink>
-@*             <MudNavLink Style="@($"height: 45px;")" IconColor="_iconColor" Href="setting" Icon="@Icons.Material.Filled.Settings">Cài đặt</MudNavLink> *@
             <MudNavLink Style=@(_height) IconColor="_iconColor" Href="agency" Icon="@Icons.Material.Filled.Badge">Đại lý</MudNavLink>
-            <MudNavLink Style=@(_height) IconColor="_iconColor" Href="product" Icon="@Icons.Material.Filled.Token">Admin</MudNavLink>
-            @*             <MudNavGroup Style="@($"height: 50px;")" IconColor="Color.Info" Title="Nhân sự" Icon="@Icons.Material.Filled.Groups" Expanded="true">
-            <MudNavLink Style="@($"height: 50px;")" IconColor="_iconColor" Href="staff" Icon="@Icons.Material.Filled.Group">Nhân viên</MudNavLink>
-            <MudNavLink Style="@($"height: 50px;")" IconColor="_iconColor" Href="dounut-chart" Icon="@Icons.Material.Filled.Work">Đối tác</MudNavLink>
-            <MudNavLink Style="@($"height: 50px;")" IconColor="_iconColor" Href="account" Icon="@Icons.Material.Filled.AssignmentInd">Tài khoản</MudNavLink>
-            </MudNavGroup>
-            <MudNavGroup Style="@($"height: 50px;")" IconColor="Color.Info" Title="Settings" Icon="@Icons.Material.Filled.Settings" Expanded="true">
-            <MudNavLink Style="@($"height: 50px;")" IconColor="_iconColor" Href="configuration" Icon="@Icons.Material.Filled.DisplaySettings">Cấu hình</MudNavLink>
-            <MudNavLink Style="@($"height: 50px;")" IconColor="_iconColor" Href="security" Icon=@Icons.Material.Filled.AdminPanelSettings>Bảo mật</MudNavLink>
-            </MudNavGroup> *@
+            <MudNavLink Style=@(_height) IconColor="_iconColor" Href="admin" Icon="@Icons.Material.Filled.Token">Admin</MudNavLink>
         </MudNavMenu>
     </MudDrawer>
     <MudMainContent style="background:#F5F7FF;">
         @* <MudMainContent style="background:#F5F7FF;" Class="pt-20 px-10"> *@
         @Body
+        @* @DialogflowChat *@
     </MudMainContent>
 </MudLayout>
 @* </AuthorizeView> *@
@@ -100,40 +102,49 @@
     private Breakpoint _breakpoint = Breakpoint.Md;
     private DrawerClipMode _clipMode = DrawerClipMode.Always;
     public string Search { get; set; }
+    private bool _openPopup = false;
+
+    private List<Notification> Notifications = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Notifications = await NotifyService.GetAll();
+    }
+
     private void ToggleDrawer()
     {
         _open = !_open;
     }
-    private bool _openPopup = false;
 
     private void ToggleOpen() => _openPopup = !_openPopup;
 
     private bool isPopupVisible = false;
+    private MarkupString DialogflowChat => (MarkupString)@"
+        <style>
+           df-messenger {
+              /*
+               * Customize as required. df-messenger will fill the
+               * space that is provided.
+              */
+              position: absolute;
+              left: 5px !important;
+              bottom: 5px;
+            }
+            df-messenger chat-message {
+                line-height: 2; /* Điều chỉnh khoảng cách dòng tin nhắn */
+              }
+        </style>
 
-    // Danh sách thông báo
-    private List<Notification> Notifications = new List<Notification>
-    {
-        new Notification { Message = "Thông báo 1", Link = "https://example.com/1", IsChecked = false },
-        new Notification { Message = "Thông báo 2", Link = "https://example.com/2", IsChecked = true },
-        new Notification { Message = "Thông báo 3", Link = "https://example.com/3", IsChecked = false }
-    };
+        <df-messenger intent='WELCOME'
+                      chat-title='CHAT'
+                      agent-id='1d0d3f14-db5b-4eda-8929-ac049969b15f'
+                      language-code='vi'></df-messenger>
+        <script src='https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1'></script>
+    ";
 
-    // Toggle hiển thị popup
-    private void ToggleNotificationPopup()
-    {
-        isPopupVisible = !isPopupVisible;
-    }
-
-    // Lớp dữ liệu thông báo
-    public class Notification
-    {
-        public string Message { get; set; }
-        public string Link { get; set; }
-        public bool IsChecked { get; set; }
-    }
     async Task Logout()
     {
         await AuthService.Logout();
-        Navigation.NavigateTo("login");
+        Navigation.NavigateTo("/");
     }
 }

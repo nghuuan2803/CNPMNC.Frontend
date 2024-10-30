@@ -1,9 +1,7 @@
-﻿using AdminUI.Objects.Response;
-using AdminUI.Objects;
+﻿using AdminUI.Objects;
 using Blazored.LocalStorage;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using AdminUI.Objects.Request;
 
 namespace AdminUI.ApiServices
 {
@@ -32,103 +30,29 @@ namespace AdminUI.ApiServices
             }
         }
 
-        public async Task<bool> CreateAsync(ExportModel model)
+        public async Task<ExportModel> ApprovalAsync(ExportModel model)
         {
-            //await AddJwtHeader();
-
-            try
-            {
-                // Gửi POST request tới API
-                var response = await _http.PostAsJsonAsync("api/Export", model);
-
-                // Kiểm tra kết quả
-                if (response.IsSuccessStatusCode)
-                {
-                    // Đọc dữ liệu trả về từ API (ID sản phẩm)
-                    // var Export = await response.Content.ReadFromJsonAsync<ExportResponse>();
-                    return true;
-                }
-                else
-                {
-                    return false;
-                    //throw new Exception("Failed to create Export");
-                }
-            }
-            catch (Exception ex)
-            {
-                // Xử lý ngoại lệ
-                Console.WriteLine($"Error: {ex.Message}");
-                throw new Exception("API call failed");
-            }
+            var res = await _http.PostAsJsonAsync("api/Export/approval", model);
+            res.EnsureSuccessStatusCode();
+            var data = await res.Content.ReadFromJsonAsync<ExportResponse>();
+            if (data != null)
+                return data.Data;
+            return model;
         }
-        public async Task<bool> UpdateStatus(int ExportId, int status)
+        public async Task<bool> CompleteAsync(ExportModel model)
         {
-            //await AddJwtHeader();
-
-            try
-            {
-                var model = new UpdateStatusRequest(ExportId, status);
-                // Gửi POST request tới API
-                var response = await _http.PostAsJsonAsync("api/Export", model);
-
-                // Kiểm tra kết quả
-                if (response.IsSuccessStatusCode)
-                {
-                    // Đọc dữ liệu trả về từ API (ID sản phẩm)
-                    // var Export = await response.Content.ReadFromJsonAsync<ExportResponse>();
-                    return true;
-                }
-                else
-                {
-                    return false;
-                    //throw new Exception("Failed to create Export");
-                }
-            }
-            catch (Exception ex)
-            {
-                // Xử lý ngoại lệ
-                Console.WriteLine($"Error: {ex.Message}");
-                throw new Exception("API call failed");
-            }
+            var res = await _http.PostAsJsonAsync("api/Export/complete", model.Id);
+            return res.IsSuccessStatusCode;
         }
-        public async Task<bool> Update(ExportModel model)
+        public async Task<bool> RefuseAsync(ExportModel model)
         {
-            //await AddJwtHeader();
-            try
-            {
-                // Gửi POST request tới API
-                var response = await _http.PutAsJsonAsync("api/Export", model);
-                var msg = await response.Content.ReadFromJsonAsync<MessageResponse>();
-                Console.WriteLine(msg.Message);
-                // Kiểm tra kết quả
-                return response.IsSuccessStatusCode;
-            }
-            catch (Exception ex)
-            {
-                // Xử lý ngoại lệ
-                Console.WriteLine($"API call failed");
-                //throw new Exception("API call failed");
-                return false;
-            }
+            var res = await _http.PostAsJsonAsync("api/Export/refuse", model.Id);
+            return res.IsSuccessStatusCode;
         }
-        public async Task<bool> Delete(int id)
+        public async Task<bool> CancelAsync(ExportModel model)
         {
-            await AddJwtHeader();
-            try
-            {
-                // Gửi yêu cầu DELETE tới API
-                var response = await _http.DeleteAsync($"api/Export/delete/{id}");
-                var msg = await response.Content.ReadFromJsonAsync<MessageResponse>();
-                Console.WriteLine(msg.Message);
-                // Kiểm tra nếu yêu cầu thành công (status code 200-299)
-                return response.IsSuccessStatusCode;
-            }
-            catch (Exception ex)
-            {
-                // Xử lý ngoại lệ nếu có lỗi trong quá trình gọi API
-                Console.WriteLine($"Error: {ex.Message}");
-                return false; // Xóa thất bại do lỗi
-            }
+            var res = await _http.PostAsJsonAsync("api/Export/cancel", model.Id);
+            return res.IsSuccessStatusCode;
         }
         #region TokenHandler
         private async Task<string> GetAccessTokenAsync()

@@ -1,0 +1,101 @@
+﻿@using AdminUI.ApiServices
+@using AdminUI.Dialogs.Order
+@using AutoMapper
+@inject OrderService OrderService
+@inject ExportServices ExportService
+@inject IDialogService DialogService
+@inject HttpClient Http
+@inject IMapper Mapper
+@inject ISnackbar Snackbar
+
+<MudDataGrid T="ExportModel" ReadOnly="false" EditMode="DataGridEditMode.Form"
+             Bordered="true" Dense="true" Items="Orders" Filterable="false" Hover="true"
+             EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column" SelectedItem="tempItem"
+             Virtualize="true" Loading="loading" Height="400px" FixedHeader="true">
+    <ToolBarContent>
+
+        <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
+            <MudTooltip Text="Nhập đơn hàng">
+                <MudIconButton Icon="@Icons.Material.Filled.Add"></MudIconButton>
+            </MudTooltip>
+            <MudTooltip Text="Nhập từ file excel">
+                <MudFileUpload T="IBrowserFile">
+                    <ActivatorContent>
+                        <MudIconButton Icon="@Icons.Material.Filled.FilePresent"></MudIconButton>
+                    </ActivatorContent>
+                </MudFileUpload>
+            </MudTooltip>
+            <MudTooltip Text="Xuất danh sách ra file excel">
+                <MudIconButton Icon="@Icons.Material.Filled.Download"></MudIconButton>
+            </MudTooltip>
+        </MudButtonGroup>
+    </ToolBarContent>
+
+    <Columns>
+        <PropertyColumn Class="w-1" Property="x => x.Id" Title="Mã đơn" Editable="false" Sortable="false" />
+        <PropertyColumn Property="x => x.AgencyName" Title="Đại lý" />
+        <PropertyColumn Format="dd/MM/yyyy" Property="x => x.CreatedOn" Title="Ngày tạo đơn" />
+        <PropertyColumn Format="@("#,0 đ")" Property="x => x.Amount" Title="Tổng thanh toán" />
+
+        <TemplateColumn Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-center">
+            <CellTemplate>
+                <MudChip Text="Xử lý" Size="@Size.Medium" Icon="@Icons.Material.Filled.FormatListBulleted" Color="Color.Info" OnClick="()=>OpenViewDialog(context.Item)" />
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="ExportModel" />
+    </PagerContent>
+</MudDataGrid>
+
+
+
+@code {
+    [Parameter]
+    public List<ExportModel> Data { get; set; }
+
+    [Parameter]
+    public EventCallback<ExportModel> OnOrderApproved { get; set; }
+
+    [Parameter]
+    public List<ExportModel> Orders { get; set; }
+    private bool loading = false;
+    string _searchString = null!;
+    ExportModel tempItem = null!;
+    IList<IBrowserFile> _files = new List<IBrowserFile>();
+    private readonly DialogOptions dialogOptions = new() { MaxWidth = MaxWidth.ExtraLarge, FullWidth = true };
+
+
+    #region DataGridEvents
+
+    private void OnRowClick(DataGridRowClickEventArgs<ExportModel> args)
+    {
+        OpenViewDialog(args.Item);
+    }
+    private async Task OpenViewDialog(ExportModel model)
+    {
+        var parameters = new DialogParameters { ["Data"] = model }; //gửi tham chiếu tới dialog
+        var options = new DialogOptions { CloseOnEscapeKey = true }; //cho phép tắt dialog khi bấm nút Esc
+
+        var dialog = await DialogService.ShowAsync<ViewOrderDialog>("Thông tin đơn hàng", parameters, dialogOptions); //Bật dialog
+        var result = await dialog.Result;
+        if (!result.Canceled && result.Data is ExportModel data)
+        {
+            Snackbar.Add("Duyệt đơn thành công", Severity.Success);
+            if (OnOrderApproved.HasDelegate)
+            {
+                RefreshOrders(data);
+                await OnOrderApproved.InvokeAsync(data);
+            }
+        }
+    }
+    private void RefreshOrders(ExportModel data)
+    {
+        var item = Orders.Find(a => a.Id == data.Id);
+        Orders.Remove(item);
+        StateHasChanged(); // Kích hoạt cập nhật lại giao diện
+    }
+
+    #endregion
+
+}

@@ -1,4 +1,5 @@
 ﻿@page "/warehouse"
+
 @inject IDialogService DialogService
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
@@ -10,42 +11,40 @@
 @using AdminUI.Dialogs.Warehouse
 @using ClosedXML.Excel;
 @inject AuthenticationStateProvider AuthenticationStateProvider
+<div class="pa-10">
+    <MudDataGrid T="WarehouseModel" ReadOnly="false" EditMode="DataGridEditMode.Form" QuickFilter="@_quickFilter"
+                 Bordered="true" Dense="true" Items="Data" Filterable="false" Hover="true" RowClick="OnRowClick"
+                 EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column" SelectedItem="tempItem" CommittedItemChanges="CommittedItemChanges"
+                 Virtualize="true" Loading="loading" Height="400px" FixedHeader="true">
+        <ToolBarContent>
 
-<MudDataGrid T="WarehouseModel" ReadOnly="false" EditMode="DataGridEditMode.Form" QuickFilter="@_quickFilter"
-             Bordered="true" Dense="true" Items="Data" Filterable="false" Hover="true" RowClick="OnRowClick"
-             EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column" SelectedItem="tempItem" CommittedItemChanges="CommittedItemChanges"
-             Virtualize="true" Loading="loading" Height="400px" FixedHeader="true">
-    <ToolBarContent>
+            <MudTooltip Text="Thêm kho">
+                <MudIconButton Color="Color.Tertiary" Icon="@Icons.Material.Filled.Add" @onclick="OpenAddDialogAsync"></MudIconButton>
+            </MudTooltip>
+            <MudSpacer />
+            <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.End" Immediate="true"
+                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
 
-        <MudTooltip Text="Thêm kho">
-            <MudIconButton Color="Color.Tertiary" Icon="@Icons.Material.Filled.Add" @onclick="OpenAddDialogAsync"></MudIconButton>
-        </MudTooltip>
-        <MudSpacer />
-        <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.End" Immediate="true"
-                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+        <Columns>
+            <PropertyColumn style="width:100px" Property="x => x.Id" Title="Mã kho" Editable="false" />
+            <PropertyColumn Property="x => x.Name" Title="Tên chi nhánh" />
+            <PropertyColumn Property="x => x.PhoneNumber" Title="SĐT" />
+            <PropertyColumn Property="x => x.Email" Title="Email" />
+            <PropertyColumn Property="x => x.ManagerId" Title="Thủ kho" />
+            <TemplateColumn Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-center">
+                <CellTemplate>
+                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Color="Color.Warning" OnClick="@context.Actions.StartEditingItemAsync" />
+                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="()=> ShowDeleteConfirmation(context.Item)" />
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager T="WarehouseModel" />
+        </PagerContent>
+    </MudDataGrid>
+</div>
 
-    </ToolBarContent>
-    <Columns>
-        <HierarchyColumn T="WarehouseModel" ButtonDisabledFunc="@(x => x.Name == "He")" />
-        <PropertyColumn Class="w-1" Property="x => x.Id" Title="Id" Editable="false" />
-        <PropertyColumn Property="x => x.Name" Title="Tên chi nhánh" />
-        <PropertyColumn Property="x => x.PhoneNumber" Title="SĐT" />
-        <PropertyColumn Property="x => x.Email" Title="Email" />
-        <TemplateColumn Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-center">
-            <CellTemplate>
-                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Color="Color.Warning" OnClick="@context.Actions.StartEditingItemAsync" />
-                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="()=> ShowDeleteConfirmation(context.Item)" />
-                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.MoreVert" Color="Color.Dark" OnClick="()=> ShowDeleteConfirmation(context.Item)" />
-            </CellTemplate>
-        </TemplateColumn>
-    </Columns>
-    <ChildRowContent>
-        <MudText>Địa chỉ: @context.Item.Address</MudText>
-    </ChildRowContent>
-    <PagerContent>
-        <MudDataGridPager T="WarehouseModel" />
-    </PagerContent>
-</MudDataGrid>
 <script>
     window.downloadFileFromByteArray = (fileName, byteArray) => {
         // Tạo Blob từ byte array

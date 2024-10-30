@@ -4,11 +4,15 @@
     {
         public int Id { get; set; }
 
+        public string? InvoiceId { get; set; }
+
         public double Amount { get; set; }
 
-        public int Status { get; set; }
+        public ExportStatus Status { get; set; }
 
         public DateTime CreatedOn { get; set; }
+
+        public DateTime? ExportDate { get; set; }
 
         //[StringLength(200)]
         public string? Note { get; set; }
@@ -19,10 +23,12 @@
 
         public int AgencyId { get; set; }
 
+        public string OrderBy { get; set; }
+
         public string AgencyName { get; set; }
 
         //[StringLength(10)]
-        public string ManagerId { get; set; }
+        public string? ManagerId { get; set; }
 
         public string? ManagerName { get; set; }
 
@@ -78,5 +84,14 @@
         public string CategoryName { get; set; }
 
         public string BrandName { get; set; }
+    }
+    public enum ExportStatus
+    {
+        Pending,
+        OrderCanceled,
+        OrderRefuse,
+        InProgress,
+        Completed,
+        Canceled
     }
 }

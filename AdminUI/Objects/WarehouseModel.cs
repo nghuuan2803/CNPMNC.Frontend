@@ -22,6 +22,8 @@
         //[StringLength(10)]
         public string? ManagerId { get; set; } //FK
 
+        public string? KeeperName { get; set; }
+
         public WarehouseModel(string id, string name, string address, string email, string phoneNumber, int capacityStatus = 0, bool discontinued = false, string? managerId = null)
         {
             Id = id;

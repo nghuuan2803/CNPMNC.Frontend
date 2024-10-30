@@ -1,0 +1,69 @@
+﻿@using AdminUI.ApiServices
+@using AutoMapper
+@inject IDialogService DialogService
+@inject HttpClient Http
+@inject IMapper Mapper
+@inject InventoryService Service
+
+<MudDialog>
+    <DialogContent>
+        <div class="py-5">
+            <MudDataGrid T="InventoryModel" ReadOnly="false" EditMode="DataGridEditMode.Form" Outlined
+                         Bordered="false" Dense="true" Items="Data" Filterable="false" Hover="true" SortMode="SortMode.None"
+                         EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column"
+                         Virtualize="true" FixedHeader="true">
+                <Columns>
+                    <PropertyColumn Property="x => x.WarehouseId" Title="Mã kho" Editable="false" />
+                    <PropertyColumn Property="x => x.WarehouseName" Title="Tên kho" Editable="false" />
+                    <PropertyColumn Property="x => x.Quantity" Title="Số lượng tồn" Editable="false" />
+                    <TemplateColumn>
+                        <CellTemplate>
+                            @if (context.Item.Quantity < Quantity)
+                            {
+                                <MudChip Color="Color.Default" Label="true" Text="Không đủ" />
+                            }
+                            else
+                            {
+                                <MudChip Color="Color.Tertiary" Label="true" Text="Chọn" OnClick="()=>OnSelect(context.Item)" />
+                            }
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+            </MudDataGrid>
+            @if (notEnough)
+            {
+                <MudStack Class="ma-5" AlignItems="AlignItems.Center">
+                    <MudText Align="Align.Center" Color="Color.Warning">Cần gộp hàng để đủ số lượng xuất</MudText>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary">Gộp</MudButton>
+                </MudStack>
+            }
+        </div>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public string ProductId { get; set; }
+
+    [Parameter]
+    public int Quantity { get; set; }
+
+    public WarehouseModel Warehouse { get; set; }
+    public List<InventoryModel> Data { get; set; }
+    public InventoryModel Inventory { get; set; }
+
+    bool notEnough = false;
+
+    protected async override Task OnInitializedAsync()
+    {
+        Data = await Service.GetbyProduct(ProductId);
+        notEnough = !Data.Any(p => p.Quantity >= Quantity);
+    }
+    private void OnSelect(InventoryModel item)
+    {
+        MudDialog.Close(DialogResult.Ok(item));
+    }
+}

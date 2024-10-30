@@ -1,0 +1,139 @@
+﻿@using AdminUI.ApiServices
+@using AdminUI.Objects.Request
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject InventoryService InventoryService
+@inject WarehouseServices _warehouseService
+
+
+<MudDialog>
+    <TitleContent>
+        <MudStack Row Justify="Justify.SpaceBetween">
+            <MudText Typo="Typo.h6">
+                <MudIcon Icon="@Icons.Material.Filled.PlaylistAdd" Class="mr-3" /> Tạo phiếu gộp hàng
+            </MudText>
+        </MudStack>
+    </TitleContent>
+    <DialogContent>
+        <div>
+            <MudPaper Outlined Elevation="1" Class="pa-5">
+                <MudForm @ref=form>
+                    <div class="row pt-1">
+                        <div class="col-12 col-md-6">
+                            <MudTextField Class="mb-4" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Outlined.Warehouse" AdornmentColor="Color.Default" Margin="Margin.Dense" Variant="Variant.Text" @bind-Value=Data.WarehouseId Disabled Label="Mã kho" />
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <MudTextField Class="mb-4" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Outlined.Warehouse" AdornmentColor="Color.Default" Margin="Margin.Dense" Variant="Variant.Text" @bind-Value=Data.WarehouseName Disabled Label="Kho nguồn" />
+                        </div>
+                    </div>
+                    
+                    <div class="row pt-1">
+                        <div class="col-12 col-md-6">
+                            <MudTextField Class="mb-4" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Outlined.Api" AdornmentColor="Color.Default" Margin="Margin.Dense" Variant="Variant.Text" @bind-Value=Data.ProductId Disabled Label="Mã sản phẩm" />
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <MudTextField Class="mb-4" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Outlined.Api" AdornmentColor="Color.Default" Margin="Margin.Dense" Variant="Variant.Text" @bind-Value=Data.ProductName Disabled Label="Tên sản phẩm" />
+                        </div>
+                    </div>
+                    
+                    <div class="row pt-1">
+                        <div class="col-12 col-md-6">
+                            <MudTextField Class="mb-4" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Outlined.Person" AdornmentColor="Color.Default" Margin="Margin.Dense" Variant="Variant.Text" @bind-Value=managerid Disabled Label="Người tạo phiếu" />
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <MudDatePicker Class="mb-4" Adornment="Adornment.End" Variant="Variant.Text" Margin="Margin.Dense" DateFormat="@("dd/MM/yyyy")" PickerVariant="PickerVariant.Dialog" Label="Ngày tạo phiếu" DisplayMonths="1" TitleDateFormat="dddd, dd MMMM" @bind-Date="CreateOn" ReadOnly />
+                        </div>
+                    </div>
+                   
+                    <div class="row pt-1">
+                        <div class="col-12 col-md-6">
+                            <MudSelect Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value=to Text="Chọn kho chuyển tới" Label="Kho đích" Required RequiredError="Chưa chọn kho đích">
+                                @foreach (var warehouse in warehouses)
+                                {
+                                    <MudSelectItem Value="warehouse.Id">[@warehouse.Id] - @warehouse.Name</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <MudNumericField Required RequiredError="Chưa nhập số lượng" Min="1" Max="Data.Quantity" Class="mb-4" Adornment="Adornment.End" Margin="Margin.Dense" Variant="Variant.Outlined" T="int" @bind-Value=qty Label="Số lượng" />
+                        </div>
+                    </div>
+                </MudForm>
+            </MudPaper>
+        </div>
+
+        <MudStack AlignItems="AlignItems.Center" Class="ma-5">
+            <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.AddCircle" Color="Color.Tertiary" OnClick="Submit">Xác nhận</MudButton>
+        </MudStack>
+
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public InventoryModel Data { get; set; } = new();
+    int qty = 0;
+    string managerid = "EMP001";
+    MudForm form;
+
+    List<WarehouseModel> warehouses = new();
+    string to;
+    MergeInventoryRequest request;
+    MergeModel response;
+
+    int spacing = 0;
+
+    public DateTime? CreateOn { get; set; } = DateTime.Now;
+
+
+
+    protected async override Task OnInitializedAsync()
+    {
+        await Task.Delay(200);
+        try
+        {
+            warehouses = await _warehouseService.GetAllAsync();
+        }
+        catch
+        {
+            Snackbar.Add("Không tải được dữ liệu từ máy chủ");
+            Cancel();
+        }
+    }
+
+
+
+    private async Task Submit()
+    {
+        await form.Validate();
+        if (form.IsValid)
+        {
+
+            try
+            {
+                request = new MergeInventoryRequest
+                    {
+                        ManagerId = managerid,
+                        From = Data.WarehouseId,
+                        ProductId = Data.ProductId,
+                        To = to,
+                        Quantity = qty
+                    };
+                var rs = await InventoryService.MergeAsync(request);
+                MudDialog.Close(DialogResult.Ok(true));
+            }
+            catch
+            {
+                Cancel();
+                Snackbar.Add("Lỗi hệ thống!", Severity.Error);
+            }
+        }
+    }
+
+
+    private void Cancel() => MudDialog.Cancel();
+
+}

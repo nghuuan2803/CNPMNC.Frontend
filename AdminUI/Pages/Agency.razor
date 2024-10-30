@@ -37,10 +37,6 @@
             <CellTemplate>
                 <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Color="Color.Warning" OnClick="@context.Actions.StartEditingItemAsync" />
                 <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="()=> ShowDeleteConfirmation(context.Item)" />
-                @if (context.Item.Discontinued)
-                {
-                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.LockPerson" Color="Color.Dark" OnClick="()=> ShowDeleteConfirmation(context.Item)" />
-                }
             </CellTemplate>
         </TemplateColumn>
     </Columns>

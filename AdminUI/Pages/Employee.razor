@@ -11,7 +11,7 @@
 @using ClosedXML.Excel;
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<MudDataGrid T="EmployeeModel" ReadOnly="false" EditMode="DataGridEditMode.Form" QuickFilter="@_quickFilter"
+<MudDataGrid T="EmployeeModel" ReadOnly="false" EditMode="DataGridEditMode.Form" QuickFilter="@_quickFilter" Square
              Bordered="true" Dense="true" Items="Data" Filterable="false" Hover="true" RowClick="OnRowClick"
              EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column" SelectedItem="tempItem" CommittedItemChanges="CommittedItemChanges"
              Virtualize="true" Loading="loading" Height="400px" FixedHeader="true">
@@ -26,27 +26,17 @@
 
     </ToolBarContent>
     <Columns>
-        <HierarchyColumn T="EmployeeModel" ButtonDisabledFunc="@(x => x.Id == "He")" />
         <PropertyColumn Class="w-1" Property="x => x.Id" Title="Mã NV" Editable="false" />
         <PropertyColumn Property="x => x.FirstName" Title="Họ" />
         <PropertyColumn Property="x => x.LastName" Title="Tên" />
-        <PropertyColumn Property="x => x.Salary" Title="Lương" />
+        <PropertyColumn Format="#,0 đ" Property="x => x.Salary" Title="Lương" />
         <TemplateColumn Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-center">
             <CellTemplate>
                 <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Color="Color.Warning" OnClick="@context.Actions.StartEditingItemAsync" />
                 <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="()=> ShowDeleteConfirmation(context.Item)" />
-                @if (context.Item.Status != 0)
-                {
-                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.LockPerson" Color="Color.Dark" OnClick="()=> ShowDeleteConfirmation(context.Item)" />
-                }
             </CellTemplate>
         </TemplateColumn>
     </Columns>
-    <ChildRowContent>
-        <MudText>Địa chỉ: @context.Item.Address</MudText>
-        <MudText>Email: @context.Item.Email</MudText>
-        <MudText>SĐT: @context.Item.PhoneNumber</MudText>
-    </ChildRowContent>
     <PagerContent>
         <MudDataGridPager T="EmployeeModel" />
     </PagerContent>

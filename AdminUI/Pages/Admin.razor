@@ -1,4 +1,4 @@
-﻿@page "/product"
+﻿@page "/admin"
 @inject IDialogService DialogService
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
@@ -12,13 +12,19 @@
 @using ClosedXML.Excel;
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
+<style>
+    width-100{
+        width:100px;
+    }
+</style>
+
 <MudTabs Outlined="true" Centered="true">
-    <MudTabPanel Text="Sản phẩm" Icon="@Icons.Material.Filled.Api">
-        <div class="pt-10 px-10">
-            <MudDataGrid T="ProductModel" ReadOnly="false" EditMode="DataGridEditMode.Form" QuickFilter="@_quickFilter"
-                         Bordered="false" Dense="true" Items="Data" Filterable="false" Hover="true" RowClick="OnRowClick"
+    <MudTabPanel Text="Sản phẩm" Icon="@Icons.Material.Filled.DashboardCustomize">
+        <div class="pa-10">
+            <MudDataGrid @ref=_datagrid T="ProductModel" ReadOnly="false" EditMode="DataGridEditMode.Form" QuickFilter="@_quickFilter"
+                         Bordered="true" Dense="true" Items="Data" Filterable="false" Hover="true" RowClick="OnRowClick" Height="600"
                          EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column" SelectedItem="tempItem" CommittedItemChanges="CommittedItemChanges"
-                         Virtualize="true" Loading="loading" Height="400px" FixedHeader="true">
+                         Virtualize="true" Loading="loading" FixedHeader="true">
                 <ToolBarContent>
                     <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
                         <MudTooltip Text="Thêm sản phẩm">
@@ -41,11 +47,11 @@
                                   AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="ml-1"></MudTextField>
                 </ToolBarContent>
                 <Columns>
-                    <PropertyColumn Class="w-1" Property="x => x.Id" Title="Mã sản phẩm" Editable="false" />
+                    <PropertyColumn Property="x => x.Id" Title="#" Editable="false" />
                     <PropertyColumn Property="x => x.Name" Title="Tên sản phẩm" />
                     <PropertyColumn Format="#,0 đ" Property="@(x => x.Price)" Title="Đơn giá" />
                     <PropertyColumn Property="x => x.Quantity" Title="Tồn kho" Editable="false" />
-                    <TemplateColumn Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-end">
+                    <TemplateColumn Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-center">
                         <CellTemplate>
                             <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Color="Color.Warning" OnClick="@context.Actions.StartEditingItemAsync" />
                             <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="()=> ShowDeleteConfirmation(context.Item)" />
@@ -55,19 +61,20 @@
                 </Columns>
                 <PagerContent>
                     <MudDataGridPager T="ProductModel" />
+                    
                 </PagerContent>
             </MudDataGrid>
         </div>
     </MudTabPanel>
-    <MudTabPanel Text="Danh mục" Icon="@Icons.Material.Filled.BugReport">
+    <MudTabPanel Text="Danh mục" Icon="@Icons.Material.Filled.Category">
 
     </MudTabPanel>
-    <MudTabPanel Text="Nhãn hàng" Icon="@Icons.Material.Filled.BugReport">
+    <MudTabPanel Text="Nhãn hàng" Icon="@Icons.Material.Filled.BrandingWatermark">
 
     </MudTabPanel>
     <MudTabPanel Text="Nhà cung cấp" Icon="@Icons.Material.Filled.Api">
         <div class="pt-10 px-10">
-            <MudDataGrid T="SuplierModel" Items="supliers" RowClick="OnSuplierRowClick" Dense="true" EditMode="DataGridEditMode.Form" CommittedItemChanges=""
+            <MudDataGrid T="SuplierModel" Items="supliers" RowClick="OnSuplierRowClick" Dense="true" EditMode="DataGridEditMode.Form"
             EditTrigger="DataGridEditTrigger.Manual">
 
                 <ToolBarContent>
@@ -99,6 +106,9 @@
 
         </div>
     </MudTabPanel>
+    <MudTabPanel Text="Kho" Icon="@Icons.Material.Filled.House">
+        <Warehouse></Warehouse>
+    </MudTabPanel>
 </MudTabs>
 
 <script>
@@ -122,6 +132,8 @@
     };
 </script>
 @code {
+    private MudDataGrid<ProductModel> _datagrid;
+
     private async Task OpenAddSuplierDialogAsync()
     {
         loading = true;

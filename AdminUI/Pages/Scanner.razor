@@ -1,0 +1,103 @@
+﻿@page "/scanner"
+@using AdminUI.ApiServices
+@using System.Timers
+@inject ScanService Service
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject IJSRuntime JS
+
+<div class="pa-5" style="min-height:100vh" @onclick=OnClickOut>
+    <input @bind-value=rfidTag @ref=rfidInputRef @onkeydown="HandleRFIDInput" id="rfidInput" />
+
+    <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" @onclick=OnClickOut>
+       
+        @if (scanning)
+        {
+            <img style="border-radius:20px; width:60%" src="scaner.gif" />
+        }
+        else
+        {
+            <MudText>@Item.ProductName</MudText>
+        }
+    </MudStack>
+</div>
+@code {
+    bool scanning = true;
+    private string rfidTag = "";
+    private DateTime lastKeyPressTime;
+    public ItemModel Item { get; set; }
+    private ElementReference rfidInputRef;
+    // private Timer focusTimer;
+
+    protected override void OnInitialized()
+    {
+        // Khởi tạo Timer với độ trễ 5 giây
+        // focusTimer = new Timer(5000); // 5000 milliseconds = 5 seconds
+        // focusTimer.Elapsed += FocusInput;
+        // focusTimer.AutoReset = true; // Lặp lại định kỳ
+        // focusTimer.Start();
+    }
+    private async void FocusInput(object sender, ElapsedEventArgs e)
+    {
+        // Focus vào input mỗi 5 giây
+        await InvokeAsync(async () => await rfidInputRef.FocusAsync());
+    }
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await rfidInputRef.FocusAsync();
+        }
+    }
+    private async Task OnClickOut()
+    {
+        await rfidInputRef.FocusAsync();
+    }
+
+    private void HandleRFIDInput(KeyboardEventArgs e)
+    {
+        if ((DateTime.Now - lastKeyPressTime).TotalMilliseconds > 1000)
+        {
+            // Nếu khoảng cách giữa các phím dài hơn 1 giây, reset chuỗi
+            rfidTag = "";
+        }
+        lastKeyPressTime = DateTime.Now;
+
+        // Thêm ký tự vào chuỗi nếu đó là ký tự hợp lệ
+        if (e.Key.Length == 1)
+        {
+            rfidTag += e.Key;
+        }
+        else if (e.Key == "Enter")
+        {
+            // Khi nhấn Enter, nghĩa là đã quét xong mã RFID
+            ProcessRFIDTag();
+        }
+    }
+
+    private async Task ProcessRFIDTag()
+    {
+        // Gửi mã RFID tới API
+        await SendRFIDTagToApi(rfidTag);
+        rfidTag = ""; // Reset sau khi xử lý
+        StateHasChanged();
+    }
+
+    private async Task SendRFIDTagToApi(string tag)
+    {
+        var response = await Service.ScanAll(tag);
+        scanning = false;
+        Item = response.Item;
+    }
+    // public void Dispose()
+    // {
+    //     // Giải phóng Timer khi component bị hủy
+    //     if (focusTimer != null)
+    //     {
+    //         focusTimer.Stop();
+    //         focusTimer.Dispose();
+    //     }
+    // }
+}

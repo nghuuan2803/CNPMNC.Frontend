@@ -1,0 +1,86 @@
+﻿@using AdminUI.ApiServices
+@inject NavigationManager Navigation
+@inject JwtAuthenticationStateProvider AuthenticationStateProvider
+@inject AuthenticationService AuthenticationService
+@inject IDialogService DialogService
+@inject IJSRuntime JS
+<MudDialog>
+    <DialogContent>
+        <div class="pa-5"  @onclick=OnClickOut>
+
+
+            <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" @onclick=OnClickOut>
+
+                @if (scanning)
+                {
+                    <img style="border-radius:20px; width:60%" src="scaner.gif" />
+                }
+            </MudStack>
+            <input @bind-value=rfidTag @ref=rfidInputRef @onkeydown="HandleRFIDInput" id="rfidInput" autofocus style="opacity: 0; position: absolute; left: -9999px;" />
+        </div>
+
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+
+
+    bool scanning = true;
+    private string rfidTag = "";
+    private DateTime lastKeyPressTime;
+    private ElementReference rfidInputRef;
+    // private Timer focusTimer;
+
+    protected async override void OnInitialized()
+    {
+        await Task.Delay(300);
+        await rfidInputRef.FocusAsync();
+    }
+
+    private async Task OnClickOut()
+    {
+        await rfidInputRef.FocusAsync();
+    }
+
+    private void HandleRFIDInput(KeyboardEventArgs e)
+    {
+        if ((DateTime.Now - lastKeyPressTime).TotalMilliseconds > 1000)
+        {
+            // Nếu khoảng cách giữa các phím dài hơn 1 giây, reset chuỗi
+            rfidTag = "";
+        }
+        lastKeyPressTime = DateTime.Now;
+
+        // Thêm ký tự vào chuỗi nếu đó là ký tự hợp lệ
+        if (e.Key.Length == 1)
+        {
+            rfidTag += e.Key;
+        }
+        else if (e.Key == "Enter")
+        {
+            // Khi nhấn Enter, nghĩa là đã quét xong mã RFID
+            ProcessRFIDTag();
+        }
+    }
+
+    private async Task ProcessRFIDTag()
+    {
+        // Gửi mã RFID tới API
+        await SendRFIDTagToApi(rfidTag);
+        rfidTag = ""; // Reset sau khi xử lý
+        StateHasChanged();
+    }
+
+    private async Task SendRFIDTagToApi(string tag)
+    {
+        var response = await AuthenticationService.ScanLogin(tag);
+        scanning = false;
+        if (response)
+        {
+            MudDialog.Close(DialogResult.Ok(response));
+        }
+    }
+}

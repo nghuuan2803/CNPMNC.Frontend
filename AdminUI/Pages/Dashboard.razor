@@ -7,7 +7,7 @@
         <div class="col-md-7">
             <div class="row">
                 <div class="col-md-6">
-                    <GeneralInfoCard Title="Tổng hàng hóa" Percent="35" Count="4123" BgColor="#7DA0FA"></GeneralInfoCard>
+                    <GeneralInfoCard Title="Số hàng tồn" Percent="35" Count="4123" BgColor="#7DA0FA"></GeneralInfoCard>
                 </div>
                 <div class="col-md-6">
                     <GeneralInfoCard Title="Tổng nhập kho" Percent="25" Count="3210" BgColor="#4747A1"></GeneralInfoCard>
@@ -16,7 +16,7 @@
                     <GeneralInfoCard Title="Tổng xuất kho" Percent="27" Count="3326" BgColor="#7978E9"></GeneralInfoCard>
                 </div>
                 <div class="col-md-6">
-                    <GeneralInfoCard Title="Tổng hàng gửi" Percent="23" Count="3179" BgColor="#F3797E"></GeneralInfoCard>
+                    <GeneralInfoCard Title="Tổng hoàn kho" Percent="23" Count="3179" BgColor="#F3797E"></GeneralInfoCard>
                 </div>
             </div>
         </div>
@@ -28,12 +28,24 @@
         <div class="col-md-6">
             <GeneralValueChart></GeneralValueChart>
         </div>
-        <div class="col-md-6">
-            <GeneralValueChart></GeneralValueChart>
+        <div class="col-md-6 value-chart">
+            <MudChart ChartType="ChartType.Bar" ChartSeries="@Series" @bind-SelectedIndex="Index" XAxisLabels="@XAxisLabels" Width="100%" Height="300px"></MudChart>
+        </div>
+        <div class="col-md-6 value-chart">
+            <MudChart ChartType="ChartType.Line" ChartSeries="@Series" @bind-SelectedIndex="Index" XAxisLabels="@XAxisLabels" Width="100%" Height="300px" ChartOptions="@Options" />
         </div>
     </div>
 </div>
 @code {
+    private int Index = -1;
+    public ChartOptions Options = new ChartOptions();
+    public List<ChartSeries> Series = new List<ChartSeries>()
+    {
+        new ChartSeries() { Name = "United States", Data = new double[] { 40, 20, 25, 27, 46, 60, 48, 80, 15 } },
+        new ChartSeries() { Name = "Germany", Data = new double[] { 19, 24, 35, 13, 28, 15, 13, 16, 31 } },
+        new ChartSeries() { Name = "Sweden", Data = new double[] { 8, 6, 11, 13, 4, 16, 10, 16, 18 } },
+    };
+    public string[] XAxisLabels = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep" };
     protected override async Task OnInitializedAsync()
     {
         //var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();

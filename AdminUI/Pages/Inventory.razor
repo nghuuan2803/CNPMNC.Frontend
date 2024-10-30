@@ -1,6 +1,116 @@
 ﻿@page "/inventory"
-<h3>Inventory</h3>
+@using AdminUI.ApiServices
+@using AdminUI.Dialogs.Inventory
+@inject InventoryService InventoryService
+@inject ProductService ProductService
+@inject WarehouseServices ProductService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IJSRuntime JS
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+
+
+
+<div class="pa-10">
+    <MudDataGrid T="InventoryModel" ReadOnly="false" EditMode="DataGridEditMode.Form" QuickFilter="@_quickFilter" Filterable="filtered" FilterMode="@DataGridFilterMode.ColumnFilterRow"
+                 Bordered="true" Dense="true" Items="Data" Hover="true" Height="400px" FilterCaseSensitivity="DataGridFilterCaseSensitivity.CaseInsensitive"
+                 EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column" SelectedItem="tempItem"
+                 Virtualize="true" Loading="loading" FixedHeader="true">
+        <ToolBarContent>
+
+            <MudSwitch Color="filtered? Color.Tertiary: Color.Default" Size="Size.Large" @bind-Value="filtered" ThumbIcon="@(filtered==true ? Icons.Material.Filled.FilterAlt : Icons.Material.Filled.FilterAltOff)" ThumbIconColor="@(Color.Error)">Lọc</MudSwitch>
+            <MudSpacer/>
+            <MudButton Class="mx-5" StartIcon="@Icons.Material.Filled.History" Variant="Variant.Filled" Color="Color.Primary">Lịch sử chuyển kho</MudButton>
+
+        </ToolBarContent>
+        <Columns>
+            <PropertyColumn Property="x => x.WarehouseName" Title="Kho" Editable="false" />
+            <PropertyColumn Property="x => x.ProductName" Title="Sản phẩm" Editable="false" />
+            <PropertyColumn Property="x => x.Quantity" Title="Số lượng" Editable="false" Filterable="false" />
+            <TemplateColumn Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-center">
+                <CellTemplate>
+                    <MudChip Label="true" Text="Kiểm kho" Size="@Size.Small" Icon="@Icons.Material.Filled.PlaylistAdd" Color="Color.Info" OnClick="()=>CreateInventoryCheck(context.Item)" />
+                    <MudChip Label="true" Text="Chuyển kho" Size="@Size.Small" Icon="@Icons.Material.Filled.MoveUp" Color="Color.Secondary" OnClick="()=>CreateMerge(context.Item)" />
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager T="InventoryModel" />
+        </PagerContent>
+    </MudDataGrid>
+</div>
 
 @code {
+    private bool loading = true;
+    public List<InventoryModel> Data { get; set; } = new();
+    string _searchString = null!;
+    InventoryModel tempItem = null!;
+
+    bool filtered = true;
+    protected override async Task OnInitializedAsync()
+    {
+
+        await LoadData();
+        loading = false;
+    }
+
+    async Task LoadData()
+    {
+        loading = true;
+        await Task.Delay(200);
+        Data = await InventoryService.GetAll();
+        loading = false;
+    }
+
+    private Func<InventoryModel, bool> _quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+
+        if (x.ProductName.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (x.WarehouseName.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (x.ProductId.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (x.WarehouseId.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if ($"{x.Quantity}".Contains(_searchString))
+            return true;
+
+        return false;
+    };
+
+
+    async void CreateInventoryCheck(InventoryModel inventory)
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true };
+        var parameters = new DialogParameters { ["Data"] = inventory };
+        var dialog = await DialogService.ShowAsync<AddInventoryCheckDialog>("Tạo phiếu xuất kho", parameters, options);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+
+        }
+    }
+
+    async void CreateMerge(InventoryModel inventory)
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var parameters = new DialogParameters { ["Data"] = inventory };
+        var dialog = await DialogService.ShowAsync<AddMergeRequestDialog>("Tạo phiếu gộp hàng", parameters, options);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            Snackbar.Add("Chuyển thành công", Severity.Success);
+            await LoadData();
+            StateHasChanged();
+        }
+    }
 
 }

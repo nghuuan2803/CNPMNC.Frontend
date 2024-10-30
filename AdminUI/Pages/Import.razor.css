@@ -1,0 +1,16 @@
+﻿@media (min-width: 501px) {
+    .reponsive-button {
+        display: inline;
+    }
+    .reponsive-icon {
+        display: none;
+    }
+}
+@media (max-width: 500.98px) {
+    .reponsive-button {
+        display: none;
+    }
+    .reponsive-icon {
+        display: inline;
+    }
+}

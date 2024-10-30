@@ -1,0 +1,60 @@
+﻿@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+<MudDialog Style="width:400px">
+    <TitleContent>
+        <MudStack Row Justify="Justify.SpaceBetween">
+            <MudText Typo="Typo.h6">
+                <MudIcon Icon="@Icons.Material.Filled.PlaylistAdd" Class="mr-3" /> Tạo phiếu kiểm kho
+            </MudText>
+        </MudStack>
+    </TitleContent>
+    <DialogContent>
+        <div>
+            <MudPaper Outlined Elevation="1" Class="pa-5">
+                <MudTextField Class="mb-4" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Outlined.Warehouse" AdornmentColor="Color.Default" Margin="Margin.Dense" Variant="Variant.Text" @bind-Value=Data.WarehouseId ReadOnly Label="Mã kho" />
+                <MudTextField Class="mb-4" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Outlined.Warehouse" AdornmentColor="Color.Default" Margin="Margin.Dense" Variant="Variant.Text" @bind-Value=Data.WarehouseName ReadOnly Label="Tên kho" />
+                <MudTextField Class="mb-4" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Outlined.Api" AdornmentColor="Color.Default" Margin="Margin.Dense" Variant="Variant.Text" @bind-Value=Data.ProductId ReadOnly Label="Mã sản phẩm" />
+                <MudTextField Class="mb-4" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Outlined.Api" AdornmentColor="Color.Default" Margin="Margin.Dense" Variant="Variant.Text" @bind-Value=Data.ProductName ReadOnly Label="Tên sản phẩm" />
+                <MudTextField Class="mb-4" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Numbers" AdornmentColor="Color.Default" Margin="Margin.Dense" Variant="Variant.Text" @bind-Value=Data.Quantity ReadOnly Label="Số lượng" />
+                <MudDatePicker Class="mb-4" Adornment="Adornment.End" Variant="Variant.Text" Margin="Margin.Dense" DateFormat="@("dd/MM/yyyy")" PickerVariant="PickerVariant.Dialog" Label="Ngày tạo phiếu" DisplayMonths="1" TitleDateFormat="dddd, dd MMMM" @bind-Date="CreateOn" ReadOnly />
+            </MudPaper>
+        </div>
+
+        <MudStack AlignItems="AlignItems.Center" Class="ma-5">
+            <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.AddCircle" Color="Color.Tertiary" OnClick="Submit">Xác nhận</MudButton>
+        </MudStack>
+
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public InventoryModel Data { get; set; } = new();
+    int spacing = 0;
+
+    public DateTime? CreateOn { get; set; } = DateTime.Now;
+    protected async override Task OnInitializedAsync()
+    {
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+
+    private async Task Submit()
+    {
+        try
+        {
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        catch
+        {
+            Cancel();
+            Snackbar.Add("Lỗi hệ thống!", Severity.Error);
+        }
+    }
+
+}

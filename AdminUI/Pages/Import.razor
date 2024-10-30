@@ -19,9 +19,14 @@
     <MudDataGrid T="ImportModel" ReadOnly="false" EditMode="DataGridEditMode.Form" QuickFilter="@_quickFilter"
                  Bordered="true" Dense="false" Items="Data" Filterable="false" Hover="true" RowClick="OnRowClick"
                  EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column" SelectedItem="tempItem"
-                 Virtualize="true" Loading="loading" Height="400px" FixedHeader="true">
+                 Virtualize="true" Loading="loading" LoadingProgressColor="Color.Error" Height="400px" FixedHeader="true">
         <ToolBarContent>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AddCircle" @onclick="OpenAddDialogAsync">Nhập đơn</MudButton>
+            <div class="reponsive-button">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AddCircle" @onclick="OpenAddDialogAsync">Nhập phiếu</MudButton>
+            </div>
+            <div class="reponsive-icon">
+                <MudIconButton Variant="Variant.Filled" Size="Size.Medium" Color="Color.Primary" Icon="@Icons.Material.Filled.AddCircle" @onclick="OpenAddDialogAsync"/>
+            </div>
             <MudSpacer />
             <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.End" Immediate="true"
                           AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
@@ -128,21 +133,6 @@
         OpenViewDialog(args.Item);
         StateHasChanged();
     }
-    void StartedEditingItem(ImportModel item)
-    {
-        _events.Insert(0, $"Event = StartedEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
-        tempItem = item;
-    }
-
-    void CanceledEditingItem(ImportModel item)
-    {
-        _events.Insert(0, $"Event = CanceledEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
-    }
-
-    async void CommittedItemChanges(ImportModel item)
-    {
-    }
-
 
     void ShowMessage(string msg, string key = null!)
     {
@@ -156,8 +146,8 @@
     private async Task OpenAddDialogAsync()
     {
         loading = true;
-        var options = new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseOnEscapeKey = true, NoHeader = true };
-        var dialog = await DialogService.ShowAsync<AddImportDialog>("Tạo đơn nhập", options);
+        var options = new DialogOptions { MaxWidth = MaxWidth.ExtraExtraLarge, FullWidth = true, CloseOnEscapeKey = true, NoHeader = true };
+        var dialog = await DialogService.ShowAsync<AddImportDialog>("Tạo phiếu nhập", options);
         var result = await dialog.Result;
 
         if (!result.Canceled && result.Data is ImportModel model)
@@ -168,12 +158,12 @@
             if (dataResponse != null)
             {
                 Data.Insert(0, dataResponse);
-                Snackbar.Add("Đã thêm đại lý thành công!", Severity.Success);
+                Snackbar.Add("Nhập phiếu xuất thành công", Severity.Success);
                 StateHasChanged();
             }
             else
             {
-                Snackbar.Add("Đã xảy ra lỗi :(", Severity.Error);
+                Snackbar.Add("Đã xảy ra lỗi!", Severity.Error);
             }
         }
         loading = false;

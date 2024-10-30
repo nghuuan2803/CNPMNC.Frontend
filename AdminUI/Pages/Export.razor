@@ -4,6 +4,7 @@
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
 @inject ExportServices Service
+@inject OrderService OrderService
 @inject ProductService ProductService
 @inject IJSRuntime JS
 @inject HttpClient Http
@@ -11,16 +12,18 @@
 @using System.Net.Http.Json
 @using AdminUI.ApiServices
 @using AdminUI.Dialogs.Export
+@using AdminUI.Objects.Request
 @using AutoMapper
 @using ClosedXML.Excel
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<div class="pt-10 px-10">
-    <MudTabs Elevation="1" Rounded="false" Centered="true">
-        <MudTabPanel Text="Tất cả">
+
+<MudTabs Elevation="1" Rounded="false" Centered="true">
+    <MudTabPanel Text="Phiếu xuất">
+        <div class="pt-10 px-10">
             <MudDataGrid T="ExportModel" ReadOnly="false" EditMode="DataGridEditMode.Form" QuickFilter="@_quickFilter"
-                         Bordered="true" Dense="true" Items="Data" Filterable="false" Hover="true" RowClick="OnRowClick"
-                         EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column" SelectedItem="tempItem" CommittedItemChanges="CommittedItemChanges"
+                         Bordered="true" Dense="true" Items="Exports" Filterable="false" Hover="true" 
+                         EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column" SelectedItem="tempItem"
                          Virtualize="true" Loading="loading" Height="400px" FixedHeader="true">
                 <ToolBarContent>
 
@@ -33,110 +36,30 @@
 
                 </ToolBarContent>
                 <Columns>
-                    <HierarchyColumn T="ExportModel" ButtonDisabledFunc="@(x => x.Id == 0)" />
-                    <PropertyColumn Class="w-1" Property="x => x.Id" Title="Mã đơn" Editable="false" />
-                    <PropertyColumn Property="x => x.Amount" Title="Tiền nhập" />
-                    <PropertyColumn Format="dd/MM/yyyy" Property="x => x.CreatedOn" Title="Ngày nhập" />
-                    <PropertyColumn Property="x => x.ManagerName" Title="Người nhập" />
+                    <PropertyColumn Property="x => x.Id" Title="Mã Phiếu" Editable="false" />
+                    <PropertyColumn Format="dd/MM/yyyy" Property="x => x.ExportDate" Title="Ngày Xuất" />
+                    <PropertyColumn Property="x => x.ManagerName" Title="Người Duyệt" />
+                    <PropertyColumn Format="#,0 đ" Property="x => x.Amount" Title="Thành tiền" />
 
                     <TemplateColumn Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-center">
                         <CellTemplate>
-                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Color="Color.Warning" OnClick="@context.Actions.StartEditingItemAsync" />
-                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="()=> ShowDeleteConfirmation(context.Item)" />
+                            <MudChip Size="@Size.Medium" Icon="@Icons.Material.Outlined.Edit" Color="Color.Info" Text="Cập nhật" OnClick="@context.Actions.StartEditingItemAsync" />
+
                         </CellTemplate>
                     </TemplateColumn>
                 </Columns>
-                <ChildRowContent>
-                    <MudText>Ngày hoàn thành: @context.Item.CompletedDate</MudText>
-                </ChildRowContent>
                 <PagerContent>
                     <MudDataGridPager T="ExportModel" />
                 </PagerContent>
             </MudDataGrid>
-        </MudTabPanel>
-        <MudTabPanel Text="Đơn hàng"  BadgeData='"3"' BadgeColor="Color.Error">
-            <MudDataGrid T="ExportModel" ReadOnly="false" EditMode="DataGridEditMode.Form"
-                         Bordered="true" Dense="true" Items="Data" Filterable="false" Hover="true" RowClick="OnRowClick"
-                         EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column" SelectedItem="tempItem" CommittedItemChanges="CommittedItemChanges"
-                         Virtualize="true" Loading="loading" Height="400px" FixedHeader="true">
-                <ToolBarContent>
-
-                    <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
-                        <MudTooltip Text="Nhập đơn hàng">
-                            <MudIconButton Icon="@Icons.Material.Filled.Add"></MudIconButton>
-                        </MudTooltip>
-                        <MudTooltip Text="Nhập từ file excel">
-                            <MudFileUpload T="IBrowserFile">
-                                <ActivatorContent>
-                                    <MudIconButton Icon="@Icons.Material.Filled.FilePresent"></MudIconButton>
-                                </ActivatorContent>
-                            </MudFileUpload>
-                        </MudTooltip>
-                        <MudTooltip Text="Xuất danh sách ra file excel">
-                            <MudIconButton Icon="@Icons.Material.Filled.Download"></MudIconButton>
-                        </MudTooltip>
-                    </MudButtonGroup>
-
-                </ToolBarContent>
-                <Columns>
-                    <HierarchyColumn T="ExportModel" ButtonDisabledFunc="@(x => x.Id == 0)" />
-                    <PropertyColumn Class="w-1" Property="x => x.Id" Title="Mã đơn" Editable="false" />
-                    <PropertyColumn Property="x => x.Amount" Title="Tổng thanh toán" />
-                    <PropertyColumn Format="dd/MM/yyyy" Property="x => x.CreatedOn" Title="Ngày tạo đơn" />
-                    <PropertyColumn Property="x => x.AgencyName" Title="Đại lý" />
-
-                    <TemplateColumn Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-center">
-                        <CellTemplate>
-                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Color="Color.Warning" OnClick="@context.Actions.StartEditingItemAsync" />
-                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="()=> ShowDeleteConfirmation(context.Item)" />
-                        </CellTemplate>
-                    </TemplateColumn>
-                </Columns>
-                <ChildRowContent>
-                    <MudText>Ngày hoàn thành: @context.Item.CompletedDate</MudText>
-                </ChildRowContent>
-                <PagerContent>
-                    <MudDataGridPager T="ExportModel" />
-                </PagerContent>
-            </MudDataGrid>
-        </MudTabPanel>
-    </MudTabs>
-    <MudDataGrid T="ExportModel" ReadOnly="false" EditMode="DataGridEditMode.Form" QuickFilter="@_quickFilter"
-                 Bordered="true" Dense="true" Items="Data" Filterable="false" Hover="true" RowClick="OnRowClick"
-                 EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column" SelectedItem="tempItem" CommittedItemChanges="CommittedItemChanges"
-                 Virtualize="true" Loading="loading" Height="400px" FixedHeader="true">
-        <ToolBarContent>
-
-            <MudTooltip Text="Thêm kho">
-                <MudIconButton Color="Color.Tertiary" Icon="@Icons.Material.Filled.Add" @onclick="OpenAddDialogAsync"></MudIconButton>
-            </MudTooltip>
-            <MudSpacer />
-            <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.End" Immediate="true"
-                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-
-        </ToolBarContent>
-        <Columns>
-            <HierarchyColumn T="ExportModel" ButtonDisabledFunc="@(x => x.Id == 0)" />
-            <PropertyColumn Class="w-1" Property="x => x.Id" Title="Mã đơn" Editable="false" />
-            <PropertyColumn Property="x => x.Amount" Title="Tiền nhập" />
-            <PropertyColumn Format="dd/MM/yyyy" Property="x => x.CreatedOn" Title="Ngày nhập" />
-            <PropertyColumn Property="x => x.ManagerName" Title="Người nhập" />
-
-            <TemplateColumn Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-center">
-                <CellTemplate>
-                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Color="Color.Warning" OnClick="@context.Actions.StartEditingItemAsync" />
-                    <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="()=> ShowDeleteConfirmation(context.Item)" />
-                </CellTemplate>
-            </TemplateColumn>
-        </Columns>
-        <ChildRowContent>
-            <MudText>Ngày hoàn thành: @context.Item.CompletedDate</MudText>
-        </ChildRowContent>
-        <PagerContent>
-            <MudDataGridPager T="ExportModel" />
-        </PagerContent>
-    </MudDataGrid>
-</div>
+        </div>
+    </MudTabPanel>
+    <MudTabPanel Text="Duyệt đơn" BadgeData='Orders.Count' BadgeColor="Color.Error">
+        <div class="pt-10 px-10">
+            <Order Data="Data" Orders="Orders" OnOrderApproved="OnOrderApproved" />
+        </div>
+    </MudTabPanel>
+</MudTabs>
 
 <script>
     window.downloadFileFromByteArray = (fileName, byteArray) => {
@@ -163,6 +86,9 @@
     private bool loading = true;
     private List<string> _events = new();
     public List<ExportModel> Data { get; set; } = new List<ExportModel>();
+    public List<ExportModel> Exports { get; set; } = new List<ExportModel>();
+    public List<ExportModel> Orders { get; set; } = new List<ExportModel>();
+
     string _searchString = null!;
     ExportModel tempItem = null!;
     IList<IBrowserFile> _files = new List<IBrowserFile>();
@@ -184,9 +110,9 @@
         // }
         try
         {
-            await Task.Delay(100);
             loading = true;
-            Data = await Service.GetAllAsync();
+            await Task.Delay(300);
+            LoadDataAsync();
         }
         catch
         {
@@ -199,7 +125,13 @@
         }
 
     }
-
+    private async Task LoadDataAsync()
+    {
+        Data = await Service.GetAllAsync();
+        Exports = Data.Where(p => p.Status == ExportStatus.Completed || p.Status == ExportStatus.InProgress || p.Status == ExportStatus.Canceled).ToList();
+        Orders = Data.Where(p => p.Status == ExportStatus.Pending).ToList();
+        StateHasChanged();
+    }
     //Tìm kiếm
     private Func<ExportModel, bool> _quickFilter => x =>
     {
@@ -222,33 +154,7 @@
         OpenViewDialog(args.Item);
         StateHasChanged();
     }
-    void StartedEditingItem(ExportModel item)
-    {
-        _events.Insert(0, $"Event = StartedEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
-        tempItem = item;
-    }
 
-    void CanceledEditingItem(ExportModel item)
-    {
-        _events.Insert(0, $"Event = CanceledEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
-    }
-
-    async void CommittedItemChanges(ExportModel item)
-    {
-        _events.Insert(0, $"Event = CommittedItemChanges, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
-        var result = await Service.Update(item);
-        if (!result)
-        {
-            Snackbar.Add("Không thể cập nhật!", Severity.Error);
-            Data.Remove(item);
-            Data.Insert(0, tempItem);
-            StateHasChanged();
-        }
-        else
-        {
-            Snackbar.Add("Đã cập nhật sản phẩm thành công!", Severity.Success);
-        }
-    }
     void ShowMessage(string msg, string key = null!)
     {
         var config = (SnackbarOptions options) =>
@@ -258,68 +164,30 @@
         Snackbar.Add(msg, Severity.Info, configure: config, key: key);
     }
 
-
-    private async Task ShowDeleteConfirmation(ExportModel item)
-    {
-        var parameters = new DialogParameters { ["Message"] = $"Hãy cân nhắc kỹ trước khi xóa đơn [{item.Id}]" };
-        var options = new DialogOptions { CloseButton = false, CloseOnEscapeKey = true };
-
-        var dialog = DialogService.Show<ConfirmDialog>("Xác nhận xóa?", parameters, options);
-        var result = await dialog.Result;
-
-        if (!result!.Canceled)
-        {
-            DeleteItem(item);
-        }
-    }
     private async Task OpenAddDialogAsync()
     {
         loading = true;
         var options = new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseOnEscapeKey = true, NoHeader = true };
-        var dialog = await DialogService.ShowAsync<AddExportDialog>("Tạo đơn nhập", options);
+        var dialog = await DialogService.ShowAsync<ViewProductDialog>("Tạo đơn nhập", options);
         var result = await dialog.Result;
 
-        if (!result.Canceled && result.Data is ExportModel model)
+        if (!result.Canceled && result.Data is OrderRequest model)
         {
             // Thêm sản phẩm mới vào danh sách
             await Task.Delay(500);
-            bool formResult = await Service.CreateAsync(model);
-            if (formResult)
-            {
-                Data.Insert(0, model);
-                Snackbar.Add("Tạo đơn thành công!", Severity.Success);
-                StateHasChanged();
-            }
-            else
-            {
-                Snackbar.Add("Đã xảy ra lỗi :(", Severity.Error);
-            }
+            var formResult = await OrderService.CreateAsync(model);
+            // if (formResult)
+            // {
+            //     Data.Insert(0, model);
+            //     Snackbar.Add("Tạo đơn thành công!", Severity.Success);
+            //     StateHasChanged();
+            // }
+            // else
+            // {
+            //     Snackbar.Add("Đã xảy ra lỗi :(", Severity.Error);
+            // }
         }
         loading = false;
-    }
-
-    private async void DeleteItem(ExportModel item)
-    {
-
-        var result = await Service.Delete(item.Id); //gọi api xóa trên server
-        if (result == true) //kiểm tra kết quả
-        {
-            Data.Remove(item); //Xóa tại frontend
-            StateHasChanged();
-            //Snackbar.Add($"Xóa thành công", Severity.Info);
-            //tạo toast thông báo
-            Snackbar.Add($"Xóa thành công", Severity.Info);
-        }
-        else
-        {
-            Snackbar.Add($"Không thể xóa", Severity.Error);
-        }
-    }
-
-
-    private void NavigateTo(string page)
-    {
-        Navigation.NavigateTo(page);
     }
 
     private void OpenViewDialog(ExportModel model)
@@ -327,7 +195,17 @@
         var parameters = new DialogParameters { ["Data"] = model }; //gửi tham chiếu tới dialog
         var options = new DialogOptions { CloseOnEscapeKey = true }; //cho phép tắt dialog khi bấm nút Esc
 
-        DialogService.Show<ExportViewDialog>("Thông nhân viên", parameters, options); //Bật dialog
+        DialogService.Show<ExportViewDialog>("Thông tin phiếu xuất", parameters, options); //Bật dialog
+    }
+
+    private async Task OnOrderApproved(ExportModel data)
+    {
+        RefreshData(data);
+    }
+    private void RefreshData(ExportModel data)
+    {
+        Exports.Insert(0, data);
+        StateHasChanged();
     }
     #endregion
 

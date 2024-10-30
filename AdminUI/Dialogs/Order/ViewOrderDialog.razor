@@ -1,0 +1,150 @@
+﻿@using AdminUI.ApiServices
+@using AdminUI.Dialogs.Export
+@using AutoMapper
+@using System.Net.Http.Json
+@inject IMapper Mapper
+@inject ProductService ProductService
+@inject WarehouseServices WarehouseService
+@inject SuplierService SuplierService
+@inject CategoryServices CategoryService
+@inject ExportServices ExportService
+@inject HttpClient Http
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+<MudDialog>
+    <TitleContent>
+        <MudStack Row Justify="Justify.SpaceBetween">
+            <MudText Typo="Typo.h6">
+                <MudIcon Icon="@Icons.Material.Filled.FormatListNumbered" Class="mr-3" /> Chi tiết đơn hàng
+            </MudText>
+            <MudStack Row>
+                <MudButton StartIcon="" OnClick="Submit" Variant="Variant.Filled" Color="Color.Tertiary">Duyệt đơn</MudButton>
+                <MudButton StartIcon="@Icons.Material.Filled.ContentPasteOff" OnClick="Cancel" Variant="Variant.Filled" Color="Color.Error">Từ chối</MudButton>
+            </MudStack>
+        </MudStack>
+    </TitleContent>
+    <DialogContent>
+        <div class="row">
+            <div class="col-md-3">
+                <MudPaper Outlined Elevation="1" Class="pa-5">
+                    <MudTextField Class="mb-4" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Outlined.Numbers" AdornmentColor="Color.Default" Margin="Margin.Dense" Variant="Variant.Text" @bind-Value=Data.InvoiceId ReadOnly Label="Số hóa đơn" />
+                    <MudTextField Class="mb-4" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Outlined.Groups" AdornmentColor="Color.Default" Margin="Margin.Dense" Variant="Variant.Text" @bind-Value=Data.AgencyName ReadOnly Label="Đại lý" />
+                    <MudDatePicker Class="mb-4" Adornment="Adornment.End" Variant="Variant.Text" Margin="Margin.Dense" DateFormat="@("dd/MM/yyyy")" PickerVariant="PickerVariant.Dialog" Label="Ngày đặt" DisplayMonths="1" TitleDateFormat="dddd, dd MMMM" @bind-Date="CreateOn" ReadOnly />
+                    <MudTextField Class="mb-4" Format="#,0 đ" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.AttachMoney" AdornmentColor="Color.Default" Margin="Margin.Dense" Variant="Variant.Text" @bind-Value=Data.Amount ReadOnly Label="Tổng thanh toán" />
+                </MudPaper>
+            </div>
+            <div class="col-md-9">
+                <MudDataGrid Outlined Elevation="1" T="ExportItem" ReadOnly="false" EditMode="DataGridEditMode.Form"
+                             Bordered="false" Dense="true" Items="Data.Items" Filterable="false" Hover="true" SortMode="SortMode.None"
+                             EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column"
+                             Virtualize="true" FixedHeader="true">
+                    <ToolBarContent>
+                        <MudText Typo="Typo.h6">Danh sách mặt hàng</MudText>
+                        <MudSpacer />
+
+                        <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.End" Immediate="true"
+                                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="ml-1"></MudTextField>
+                    </ToolBarContent>
+                    <Columns>
+                        <PropertyColumn Class="w-1" Property="x => x.Id" Title="#" Editable="false" />
+                        <PropertyColumn Property="x => x.ProductName" Title="Sản phẩm" />
+                        <PropertyColumn Format="#,0 đ" Property="x => x.UnitPrice" Title="Đơn giá" />
+                        <PropertyColumn Property="x => x.Quantity" Title="Số lượng" />
+                        <TemplateColumn Title="--Chọn kho xuất--" Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-start">
+                            <CellTemplate>
+                                @if (context.Item.WarehouseId != null)
+                                {
+                                    <MudChip Label="true" OnClick="()=>SelectWarehouse(context.Item)" T="string" Color="Color.Primary" OnClose="()=>SelectWarehouse(context.Item)" CloseIcon="@Icons.Material.Filled.Edit">@context.Item.WarehouseId</MudChip>
+                                }
+                                else
+                                {
+                                    <MudChip Label="true" OnClick="()=>SelectWarehouse(context.Item)" T="string" Color="Color.Default" OnClose="()=>SelectWarehouse(context.Item)" CloseIcon="@Icons.Material.Filled.Edit">Chưa chọn</MudChip>
+                                }
+
+                            </CellTemplate>
+                        </TemplateColumn>
+                    </Columns>
+                </MudDataGrid>
+            </div>
+        </div>
+        <MudDialog @bind-Visible="_visible" Options="_dialogOptions">
+            <TitleContent>
+                <MudStack Row Justify="Justify.SpaceBetween">
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.FormatListNumbered" Class="mr-3" /> Chọn kho xuất hàng
+                    </MudText>
+                    <MudStack Row>
+                        <MudIconButton Variant="Variant.Filled" Icon="@Icons.Material.Filled.Close" Color="Color.Error" />
+                    </MudStack>
+                </MudStack>
+            </TitleContent>
+            <DialogContent>
+
+            </DialogContent>
+        </MudDialog>
+
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    private MudForm form;
+    [Parameter]
+    public ExportModel Data { get; set; } = new();
+
+    private bool _visible;
+    private readonly DialogOptions _dialogOptions = new() { FullWidth = true };
+    int spacing = 0;
+
+    public DateTime? CreateOn { get; set; }
+    string _searchString = null!;
+    public List<ProductModel> ProductData { get; set; }
+    public List<WarehouseModel> WarehouseData { get; set; } = new();
+    protected async override Task OnInitializedAsync()
+    {
+        ProductData = await ProductService.GetAllAsync();
+        WarehouseData = await WarehouseService.GetAllAsync();
+        CreateOn = Data.CreatedOn;
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+
+
+    async void SelectWarehouse(ExportItem item)
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, };
+        var parameters = new DialogParameters { ["ProductId"] = item.ProductId, ["Quantity"] = item.Quantity };
+        var dialog = await DialogService.ShowAsync<SelectWarehouseDialog>("Chọn kho xuất cho " + item.ProductName, parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is InventoryModel inventory)
+        {
+            item.WarehouseId = inventory.WarehouseId;
+            item.WarehouseName = inventory.WarehouseName;
+        }
+        StateHasChanged();
+    }
+
+    private async Task Submit()
+    {
+        if (Data.Items.Any(p => p.WarehouseId == null))
+        {
+            Snackbar.Add("Còn sản phẩm chưa chọn kho xuất!", Severity.Error);
+            return;
+        }
+        try
+        {
+            var res = await ExportService.ApprovalAsync(Data);
+            MudDialog.Close(DialogResult.Ok(res));
+        }
+        catch
+        {
+            Snackbar.Add("Lỗi hệ thống!", Severity.Error);            
+        }
+    }
+
+}

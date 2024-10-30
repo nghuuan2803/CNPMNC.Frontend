@@ -37,6 +37,21 @@ namespace AdminUI
             return false;
         }
 
+        public async Task<bool> ScanLogin(string rfid)
+        {
+            var response = await _httpClient.PostAsJsonAsync("api/Account/login-by-rfid", rfid);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var token = await response.Content.ReadFromJsonAsync<LoginInfo>();
+                await _localStorage.SetItemAsync("jwt_token", token.Token);
+                _authStateProvider.MarkUserAsAuthenticated(token.Token);
+                return true;
+            }
+
+            return false;
+        }
+
         public async Task Logout()
         {
             await _localStorage.RemoveItemAsync("jwt_token");

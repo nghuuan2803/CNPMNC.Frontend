@@ -1,4 +1,4 @@
-html, body {
+﻿html, body {
     font-family: 'Nunito', Helvetica, Arial, sans-serif;
 }
 h1:focus {
@@ -99,4 +99,12 @@ a, .btn-link {
 
 code {
     color: #c02d76;
+}
+
+.comming-soon {
+    height:100vh;
+    background-image: url('../../comming-soon.png');
+    background-repeat: no-repeat; /* Lặp lại hình nền */
+    background-size: cover; /* Điều chỉnh kích thước hình nền */
+    background-position: center; /* Căn giữa hình nền */
 }
