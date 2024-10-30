@@ -1,4 +1,7 @@
-﻿namespace AdminUI.Objects
+﻿using AdminUI.ApiServices;
+using MudBlazor;
+
+namespace AdminUI.Objects
 {
     public class SuplierModel
     {
@@ -35,7 +38,7 @@
     public class SuplierResponse
     {
         public string Message { get; set; }
-        public SuplierModel Data { get; set; }
+        public SuplierModel Data{ get; set; }
 
     }
     public class ListSuplierModel
@@ -44,4 +47,5 @@
         public List<SuplierModel> Data { get; set; }
 
     }
+    
 }

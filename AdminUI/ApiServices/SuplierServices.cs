@@ -2,6 +2,7 @@
 using AdminUI.Objects.Response;
 using Blazored.LocalStorage;
 using System.Net.Http.Json;
+using static System.Net.WebRequestMethods;
 
 namespace AdminUI.ApiServices
 {
@@ -35,7 +36,7 @@ namespace AdminUI.ApiServices
             try
             {
                 // Gửi POST request tới API
-                var response = await _httpClient.PostAsJsonAsync("api/Suplier", model); //sai chinh ta
+                var response = await _httpClient.PostAsJsonAsync("api/suplier", model); //sai chinh ta
 
                 if (response.IsSuccessStatusCode)
                 { // Đọc dữ liệu trả về từ API (ID sản phẩm)
@@ -69,6 +70,25 @@ namespace AdminUI.ApiServices
                 // Xử lý ngoại lệ nếu có lỗi trong quá trình gọi API
                 Console.WriteLine($"Error: {ex.Message}");
                 return false; // Xóa thất bại do lỗi
+            }
+        }
+        public async Task<bool> Update(SuplierModel model)
+        {
+            try
+            {
+                // Gửi POST request tới API
+                var response = await _httpClient.PutAsJsonAsync("api/Suplier", model);
+                var msg = await response.Content.ReadFromJsonAsync<MessageResponse>();
+                Console.WriteLine(msg.Message);
+                // Kiểm tra kết quả
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                // Xử lý ngoại lệ
+                Console.WriteLine($"API call failed");
+                //throw new Exception("API call failed");
+                return false;
             }
         }
     }

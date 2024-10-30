@@ -1,4 +1,5 @@
 ﻿@page "/product"
+@page "/supplier"
 @inject IDialogService DialogService
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
@@ -11,13 +12,15 @@
 @using AdminUI.Dialogs.Suplier
 @using ClosedXML.Excel;
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@using AdminUI.Pages
+
 
 <MudTabs Outlined="true" Centered="true">
     <MudTabPanel Text="Sản phẩm" Icon="@Icons.Material.Filled.Api">
         <div class="pt-10 px-10">
             <MudDataGrid T="ProductModel" ReadOnly="false" EditMode="DataGridEditMode.Form" QuickFilter="@_quickFilter"
                          Bordered="false" Dense="true" Items="Data" Filterable="false" Hover="true" RowClick="OnRowClick"
-                         EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column" SelectedItem="tempItem" CommittedItemChanges="CommittedItemChanges"
+                         EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column" SelectedItem="tempItem" CommittedItemChanges="OpenEditProductDialog"
                          Virtualize="true" Loading="loading" Height="400px" FixedHeader="true">
                 <ToolBarContent>
                     <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
@@ -47,7 +50,7 @@
                     <PropertyColumn Property="x => x.Quantity" Title="Tồn kho" Editable="false" />
                     <TemplateColumn Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-end">
                         <CellTemplate>
-                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Color="Color.Warning" OnClick="@context.Actions.StartEditingItemAsync" />
+                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Color="Color.Warning" OnClick="()=> OpenEditProductDialog(context.Item)" />
                             <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="()=> ShowDeleteConfirmation(context.Item)" />
                             @* <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.MoreVert" Color="Color.Dark" OnClick="()=> ShowDeleteConfirmation(context.Item)" /> *@
                         </CellTemplate>
@@ -67,8 +70,8 @@
     </MudTabPanel>
     <MudTabPanel Text="Nhà cung cấp" Icon="@Icons.Material.Filled.Api">
         <div class="pt-10 px-10">
-            <MudDataGrid T="SuplierModel" Items="supliers" RowClick="OnSuplierRowClick" Dense="true" EditMode="DataGridEditMode.Form" CommittedItemChanges=""
-            EditTrigger="DataGridEditTrigger.Manual">
+            <MudDataGrid T="SuplierModel" Items="supliers" RowClick="OnSuplierRowClick" Dense="true" EditMode="DataGridEditMode.Form" SelectedItem="sp"
+                         EditTrigger="DataGridEditTrigger.Manual" ColumnResizeMode="ResizeMode.Column" CommittedItemChanges="OpenEditSuplierDialog">
 
                 <ToolBarContent>
                     <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
@@ -86,15 +89,18 @@
                     <PropertyColumn Property="p=>p.Address" Title="Địa chỉ" />
                     <PropertyColumn Property="p=>p.Email" />
                     <PropertyColumn Property="p=>p.PhoneNumber" Title="SĐT" />
-                    <PropertyColumn Property="p=>p.ContactPerson" Title="SĐT" />
+                    <PropertyColumn Property="p=>p.ContactPerson" Title="Liên Hệ" />
                     <TemplateColumn Hidden="false" StickyRight="false" Class="w-1" CellClass="d-flex justify-end">
                         <CellTemplate>
-                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Color="Color.Warning" OnClick="@context.Actions.StartEditingItemAsync" />
+                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Color="Color.Warning" OnClick="()=> OpenEditSuplierDialog(context.Item)" />
                             <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" OnClick="()=> ShowDeleteSuplierConfirm(context.Item)" />
                             @* <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.MoreVert" Color="Color.Dark" OnClick="()=> ShowDeleteConfirmation(context.Item)" /> *@
                         </CellTemplate>
                     </TemplateColumn>
                 </Columns>
+                <PagerContent>
+                    <MudDataGridPager T="SuplierModel" />
+                </PagerContent>
             </MudDataGrid>
 
         </div>
@@ -170,6 +176,7 @@
     s.Email.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
     s.PhoneNumber.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
     private string searchTerm = string.Empty;
+    SuplierModel SuplierItem = null;
     private async Task AddSuplier()
     {
         var newSuplier = new SuplierModel();
@@ -183,6 +190,7 @@
     public List<ProductModel> ExcelData { get; set; }
     string _searchString = null!;
     ProductModel tempItem = null!;
+    SuplierModel sp;
     IList<IBrowserFile> _files = new List<IBrowserFile>();
     #endregion
 
@@ -333,6 +341,33 @@
         OpenViewDialog(args.Item);
         StateHasChanged();
     }
+    private async Task OpenEditProductDialog(ProductModel product)
+    {
+
+        loading = true;
+        var parameters = new DialogParameters { ["ExistingProduct"] = product }; // Truyền product hiện tại vào dialog
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = DialogService.Show<EditProductDialog>("Edit Product", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is ProductModel updatedProduct)
+        {
+            // Cập nhật danh sách sản phẩm khi dialog đóng
+            var index = Data.FindIndex(p => p.Id == updatedProduct.Id);
+            if (index >= 0)
+            {
+                Data[index] = updatedProduct;
+                await Service.Update(updatedProduct); // Gọi API để cập nhật sản phẩm
+                Snackbar.Add("Cập nhật sản phẩm thành công!", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add("Cập nhật sản phẩm không thành công!", Severity.Error);
+            }
+            StateHasChanged(); // Cập nhật lại giao diện
+        }
+        loading = false;
+    }
     void StartedEditingItem(ProductModel item)
     {
         _events.Insert(0, $"Event = StartedEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
@@ -342,23 +377,6 @@
     void CanceledEditingItem(ProductModel item)
     {
         _events.Insert(0, $"Event = CanceledEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
-    }
-
-    async void CommittedItemChanges(ProductModel item)
-    {
-        _events.Insert(0, $"Event = CommittedItemChanges, Data = {System.Text.Json.JsonSerializer.Serialize(item)}");
-        var result = await Service.Update(item);
-        if (!result)
-        {
-            Snackbar.Add("Không thể cập nhật!", Severity.Error);
-            Data.Remove(item);
-            Data.Insert(0, tempItem);
-            StateHasChanged();
-        }
-        else
-        {
-            Snackbar.Add("Đã cập nhật sản phẩm thành công!", Severity.Success);
-        }
     }
     private async void Recover(ProductModel item)
     {
@@ -463,23 +481,68 @@
     }
 
 
+   
+}
+@code{
     #region suplier
     private async Task ShowDeleteSuplierConfirm(SuplierModel model)
     {
         var result = await SuplierService.Delete(model.Id);
-        if(result)
+        if (result)
         {
             Snackbar.Add("Xóa thành công", Severity.Success);
             supliers.Remove(model);
         }
         else
         {
-            Snackbar.Add("Xóa thất bại", Severity.Error);            
+            Snackbar.Add("Xóa thất bại", Severity.Error);
         }
     }
-    private async Task OnCommittedSuplierChanges(SuplierModel model)
+    private async Task OpenEditSuplierDialog(SuplierModel suplier)
     {
-        //ông tự làm tiếp đi
+        loading = true;
+        var parameters = new DialogParameters { ["ExistingSuplier"] = suplier }; // Đảm bảo tên tham số khớp với form dialog
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = DialogService.Show<EditSuplierDialog>("Edit Supplier", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is SuplierModel updatedSuplier)
+        {
+            // Cập nhật dữ liệu sau khi dialog được đóng
+            var index = supliers.FindIndex(s => s.Id == updatedSuplier.Id);
+            if (index >= 0)
+            {
+                supliers[index] = updatedSuplier;
+                await SuplierService.Update(updatedSuplier);
+                Snackbar.Add("Cập nhật thành công!", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add("Không cập nhật thành công nhà cung cấp!", Severity.Error);
+            }
+            StateHasChanged(); // Đảm bảo UI cập nhật
+        }
+        loading = false;
     }
+
+    void StartedEditingItem(SuplierModel model)
+    {
+        _events.Insert(0, $"Event = StartedEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(model)}");
+        SuplierItem = model;
+    }
+
+    void CanceledEditingItem(SuplierModel model)
+    {
+        _events.Insert(0, $"Event = CanceledEditingItem, Data = {System.Text.Json.JsonSerializer.Serialize(model)}");
+    }
+
+    private void RecoverSuplier(SuplierModel suplier)
+    {
+        supliers.Insert(0, suplier); // Khôi phục nhà cung cấp đã xóa
+        StateHasChanged();
+    }
+
+    
+
     #endregion
 }

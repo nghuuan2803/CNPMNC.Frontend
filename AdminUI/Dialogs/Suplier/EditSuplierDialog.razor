@@ -1,6 +1,5 @@
-﻿@inject SuplierModel service
-@inject HttpClient http
-<MudDialog>
+﻿@inject HttpClient Http
+<MudDialog class="mud-dialog">
     <DialogContent>
         <MudForm>
             <MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Tên"
@@ -22,7 +21,7 @@
         </MudForm>
     </DialogContent>
     <DialogActions>
-        <MudButton Variant="Variant.Filled" Color="Color.Tertiary" OnClick="SubmitForm">Xác nhận</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Tertiary" OnClick="SubmitForm">Lưu thay đổi</MudButton>
         <MudButton Variant="Variant.Text" Color="Color.Secondary" OnClick="Cancel">Hủy</MudButton>
     </DialogActions>
 </MudDialog>
@@ -31,8 +30,10 @@
     [CascadingParameter]
     private MudDialogInstance MudDialog { get; set; }
 
+    [Parameter]
+    public SuplierModel ExistingSuplier { get; set; }
+
     private MudForm form;
-    private string id;
     private string name;
     private string address;
     private string email;
@@ -40,23 +41,35 @@
     private string contactPerson;
     private bool discontinued;
 
+    int spacing = 0;
+
+    protected override void OnInitialized()
+    {
+        if (ExistingSuplier != null)
+        {
+            name = ExistingSuplier.Name;
+            address = ExistingSuplier.Address;
+            email = ExistingSuplier.Email;
+            phoneNumber = ExistingSuplier.PhoneNumber;
+            contactPerson = ExistingSuplier.ContactPerson;
+            discontinued = ExistingSuplier.Discontinued;
+        }
+    }
+
     private async Task SubmitForm()
     {
         await form.Validate();
         if (form.IsValid)
         {
-            // Form is valid, close the dialog and pass the data
-            var suplierData = new SuplierModel(0,name, address, email, phoneNumber, discontinued, contactPerson);
-            MudDialog.Close(DialogResult.Ok(suplierData));
+            var updatedSuplier = new SuplierModel(ExistingSuplier.Id, name, address, email, phoneNumber, discontinued, contactPerson);
+            MudDialog.Close(DialogResult.Ok(updatedSuplier));
         }
     }
 
     private void Cancel() => MudDialog.Cancel();
 
-    int spacing = 0;
     private void OnInvalidSubmit()
     {
-        // Handle invalid form submission (e.g., display error messages)
+        // Handle invalid form submission
     }
-
 }

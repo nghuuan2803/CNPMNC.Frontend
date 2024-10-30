@@ -2,13 +2,11 @@
 @inject HttpClient http
 <MudDialog>
     <DialogContent>
-        <MudForm @ref="form" Spacing="spacing" style="width:500px">
+        <MudForm @ref="form" Spacing="spacing" class="form-container">
             <MudFileUpload T="IBrowserFile" @bind-Files="imgFile">
                 <ActivatorContent>
-                    <MudButton Variant="Variant.Filled"
-                               Color="Color.Primary"
-                               StartIcon="@Icons.Material.Filled.CloudUpload">
-                        Chọn ảnh
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload">
+                        Chọn ảnh mới
                     </MudButton>
                 </ActivatorContent>
             </MudFileUpload>
@@ -25,7 +23,7 @@
         </MudForm>
     </DialogContent>
     <DialogActions>
-        <MudButton Variant="Variant.Filled" Color="Color.Tertiary" OnClick="SubmitForm">Xác nhận</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Tertiary" OnClick="SubmitForm">Lưu thay đổi</MudButton>
         <MudButton Variant="Variant.Text" Color="Color.Secondary" OnClick="Cancel">Hủy</MudButton>
     </DialogActions>
 </MudDialog>
@@ -34,55 +32,43 @@
     [CascadingParameter]
     private MudDialogInstance MudDialog { get; set; }
 
+    [Parameter]
+    public ProductModel ExistingProduct { get; set; }
+
     private MudForm form;
 
-    IList<IBrowserFile> _files = new List<IBrowserFile>();
-    IBrowserFile imgFile;
+    private IList<IBrowserFile> _files = new List<IBrowserFile>();
+    private IBrowserFile imgFile;
 
     private string id;
     private string name;
     private string description;
-    private double price = 5000000;
-    private double importPrice = 3500000;
-    //private string category = "Personal"; // Default value
+    private double price;
+    private double importPrice;
+
+    int spacing = 0;
+
+    protected override void OnInitialized()
+    {
+        if (ExistingProduct != null)
+        {
+            id = ExistingProduct.Id;
+            name = ExistingProduct.Name;
+            description = ExistingProduct.Description;
+            price = ExistingProduct.Price;
+            importPrice = ExistingProduct.ImportPrice;
+        }
+    }
 
     private async Task SubmitForm()
     {
         await form.Validate();
-        if (form.IsValid)
-        {
-            // Form is valid, close the dialog and pass the data
-            var formData = new CreateProduct
-                {
-                    Data = new ProductModel(id, name, price, importPrice),
-                    ImageFile = imgFile
-                };
-            var productJson = System.Text.Json.JsonSerializer.Serialize(formData.Data);
-            var content = new MultipartFormDataContent();
-            var stream = formData.ImageFile.OpenReadStream(maxAllowedSize:10*1024*1024);
-            var fileContent = new StreamContent(stream);
-            content.Add(fileContent, "ImageFile", formData.ImageFile.Name);
-            content.Add(new StringContent(productJson), "DataJson");
-
-            // Gửi yêu cầu tới API
-            var response = await http.PostAsync("/api/Product/create", content);
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception("Error while calling API.");
-            }
-            // Kiểm tra kết quả
-            // Đọc dữ liệu trả về từ API (ID sản phẩm)
-            var product = await response.Content.ReadFromJsonAsync<ProductResponse>();
-            MudDialog.Close(DialogResult.Ok(product));
-        }
+        if (form.IsValid) ;
     }
-
+    private void Cancel() => MudDialog.Cancel();
     private void OnInvalidSubmit()
     {
-        // Handle invalid form submission (e.g., display error messages)
+        // Handle invalid form submission
     }
-
-    private void Cancel() => MudDialog.Cancel();
-
-    int spacing = 0;
 }
+ 

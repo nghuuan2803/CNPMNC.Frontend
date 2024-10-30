@@ -3,12 +3,20 @@
     <DialogContent>
         <div class="bg-light">
             <img src="@product.Photo" width="200" alt="Chưa cập nhật hình ảnh" />
-            <MudText Typo="Typo.h5" GutterBottom="true">Thông tin chi tiết sản phẩm @product.Name</MudText>
-            <MudForm Spacing="spacing" style="width:400px">
-                <MudTextField ReadOnly Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Id" @bind-Value="product.Id" Required="true" RequiredError="Name is required" />
-                <MudTextField ReadOnly Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Tên" @bind-Value="product.Name" Required="true" RequiredError="Name is required" />
-                <MudTextField ReadOnly=true InputType="InputType.Number" Variant="Variant.Outlined" Margin="Margin.Dense" T="double" Label="Giá" @bind-Value="product.Price" HelperText="Enter a valid price" Required="true" RequiredError="Price is required" />
-                <MudTextField ReadOnly="true" InputType="InputType.Number" Variant="Variant.Outlined" Margin="Margin.Dense" T="int" Label="Số lượng" @bind-Value="product.Quantity" HelperText="Enter quantity" Required="true" RequiredError="Quantity is required" />
+            <MudText Typo="Typo.h6" GutterBottom="true" class="dialog-title">Thông tin chi tiết sản phẩm @product.Name</MudText>
+            <MudForm Spacing="spacing" style="width:500px">
+                <MudTextField ReadOnly Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Id"
+                              @bind-Value="product.Id" Required="true" RequiredError="Name is required"
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Info" />
+                <MudTextField ReadOnly Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Tên"
+                              @bind-Value="product.Name" Required="true" RequiredError="Name is required"
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Label" />
+                <MudTextField ReadOnly="true" InputType="InputType.Number" Variant="Variant.Outlined" Margin="Margin.Dense" T="double" Label="Giá"
+                              @bind-Value="product.Price" HelperText="Enter a valid price" Required="true" RequiredError="Price is required"
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.AttachMoney" />
+                <MudTextField ReadOnly="true" InputType="InputType.Number" Variant="Variant.Outlined" Margin="Margin.Dense" T="int" Label="Số lượng"
+                              @bind-Value="product.Quantity" HelperText="Enter quantity" Required="true" RequiredError="Quantity is required"
+                              Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Inventory" />
             </MudForm>
         </div>
     </DialogContent>

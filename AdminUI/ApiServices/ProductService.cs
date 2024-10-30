@@ -194,5 +194,6 @@ namespace AdminUI.Services
         {
             public string ImageLink { get; set; }
         }
+
     }
 }

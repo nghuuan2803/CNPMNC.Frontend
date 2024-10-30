@@ -1,12 +1,22 @@
 ﻿<MudDialog>
     <DialogContent>
         <MudText Typo="Typo.h5" GutterBottom="true">Thông tin chi tiết nhà cung cấp: @suplier.Name</MudText>
-        <MudForm Spacing="spacing" style="width:400px">
-            <MudTextField ReadOnly Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Tên nhà cung cấp" @bind-Value="suplier.Name" Required="true" RequiredError="Name is required" />
-            <MudTextField ReadOnly Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Địa chỉ" @bind-Value="suplier.Address" Required="true" RequiredError="Address is required" />
-            <MudTextField ReadOnly Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Email" @bind-Value="suplier.Email" Required="true" RequiredError="Email is required" />
-            <MudTextField ReadOnly Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Số điện thoại" @bind-Value="suplier.PhoneNumber" Required="true" RequiredError="Phone Number is required" />
-            <MudTextField ReadOnly Variant="Variant.Outlined" Margin="Margin.Dense" T="string" Label="Người liên hệ" @bind-Value="suplier.ContactPerson" Required="true" RequiredError="Contact Person is required" />
+        <MudForm>
+            <MudTextField ReadOnly Variant="Variant.Text" Margin="Margin.Dense" T="string" Label="Tên nhà cung cấp"
+                          @bind-Value="suplier.Name" Required="true" RequiredError="Chưa nhập tên"
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Business" />
+            <MudTextField ReadOnly Variant="Variant.Text" Margin="Margin.Dense" T="string" Label="Địa chỉ" 
+                          @bind-Value="suplier.Address" Required="true" RequiredError="Chưa nhập địa chỉ"
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.LocationOn" />
+            <MudTextField ReadOnly Variant="Variant.Text" Margin="Margin.Dense" T="string" Label="Email" 
+                          @bind-Value="suplier.Email" Required="true" RequiredError="Chưa nhập email"
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Email" />
+            <MudTextField ReadOnly Variant="Variant.Text" Margin="Margin.Dense" T="string" Label="Số điện thoại" 
+                          @bind-Value="suplier.PhoneNumber" Required="true" RequiredError="Chưa nhập số điện thoại"
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Phone" />
+            <MudTextField ReadOnly Variant="Variant.Text" Margin="Margin.Dense" T="string" Label="Người liên hệ" 
+                          @bind-Value="suplier.ContactPerson" Required="true" RequiredError="Chưa nhập người liên hệ"
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Person" />
             <MudCheckBox ReadOnly T="bool" Label="Ngưng cung cấp" @bind-Checked="suplier.Discontinued" />
         </MudForm>
     </DialogContent>
